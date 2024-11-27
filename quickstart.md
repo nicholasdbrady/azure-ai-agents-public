@@ -177,7 +177,7 @@ Resources for the hub, project, storage account, and AI Services will be created
 <br>
 </br>
 <details>
-    <summary><b>Option 3</b>: Follow these steps if you want specific control over the creation and configuration of resources.</summary>
+    <summary><b>Option 3</b>: Follow these steps if you want specific control over the creation and configuration of resources. Only basic agent setup is supported. </summary>
 
 1. To authenticate to your Azure subscription from the Azure CLI, use the following command:
 
