@@ -4,15 +4,16 @@ This QuickStart demonstrates how to quickly set up your first agent with Azure A
 
 ## Complete Azure prerequisites
 
-1. Create an Azure Subscription for [free](https://azure.microsoft.com/free/ai-services/), if you don't have one already.
+1. Insta
+2. Create an Azure Subscription for [free](https://azure.microsoft.com/free/ai-services/), if you don't have one already.
 
-2. Make sure all developers have the role: **Azure AI Developer** assigned at the appropriate level. [Learn more](https://learn.microsoft.com/azure/ai-studio/concepts/rbac-ai-studio)
+3. Make sure all developers have the role: **Azure AI Developer** assigned at the appropriate level. [Learn more](https://learn.microsoft.com/azure/ai-studio/concepts/rbac-ai-studio)
 
    If you're using a hub/project that already exists, check the [RBAC roles](./rbac.md).
 
-3. Install [the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli-windows?tabs=azure-cli). If you have the CLI already installed, make sure it's updated to the latest version.
+4. Install [the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli-windows?tabs=azure-cli). If you have the CLI already installed, make sure it's updated to the latest version.
 
-4. Register providers
+5. Register providers
 
    The following providers must be registered:
 
@@ -179,7 +180,8 @@ Resources for the hub, project, storage account, and AI Services will be created
 <details>
     <summary><b>Option 3</b>: Follow these steps if you want specific control over the creation and configuration of resources. Only basic agent setup is supported. </summary>
 
-1. To authenticate to your Azure subscription from the Azure CLI, use the following command:
+1. Install the [Azure CLI machine learning extension.](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-configure-cli?view=azureml-api-2&tabs=public)
+2. To authenticate to your Azure subscription from the Azure CLI, use the following command:
 
    > [!NOTE]
    > Be sure to run these commands with the subscription that has been allowlisted for the private preview.
@@ -188,14 +190,14 @@ Resources for the hub, project, storage account, and AI Services will be created
    az login
    ```
 
-2. Create a resource group:
+3. Create a resource group:
 
    ```console
    az group create --name {my_resource_group} --location eastus
    ```
 
 
-3. Create an Azure OpenAI resource:
+4. Create an Azure OpenAI resource:
 
    > [!NOTE]
    > Azure AI Agent Service is currently available for all OpenAI models in available Azure Regions that are compatible with Azure Assistants (see the [models guide](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#assistants-preview)) and Llama 3.1-405B-instruct. We will be expanding to more models in the future.
@@ -212,7 +214,7 @@ Resources for the hub, project, storage account, and AI Services will be created
 
    Save the id that gets output, you’ll need it later. It will look similar to: `https://eastus.api.cognitive.microsoft.com/ai_services_resource_id: /subscriptions/1234-5678-abcd-9fc6-62780b3d3e05/resourceGroups/my-resource-group/providers/Microsoft.CognitiveServices/accounts/multi-service-resource`
 
-4. Create an Azure AI Hub.
+5. Create an Azure AI Hub.
 
    > [!NOTE] the following command auto creates a storage account, AML workspace and Key Vault.
 
@@ -228,7 +230,7 @@ Resources for the hub, project, storage account, and AI Services will be created
    az ml workspace create --kind hub --resource-group {my_resource_group} --name {my_hub_name} --location {hub-region} --storage-account {my_storage_account_id} --key-vault {my_key_vault_id}
    ```
 
-5. Connect your Hub to your Azure AI resource or Azure OpenAI resource. Replace the resource group and hub name with your resource and hub name.
+6. Connect your Hub to your Azure AI resource or Azure OpenAI resource. Replace the resource group and hub name with your resource and hub name.
 
    - Save the following in a file named `connection.yml`.
 
@@ -249,13 +251,13 @@ Resources for the hub, project, storage account, and AI Services will be created
    azure_endpoint: https://eastus.api.cognitive.microsoft.com/
    ```
 
-6. Then run the following command:
+7. Then run the following command:
 
    ```console
    az ml connection create --file connection.yml --resource-group {my_resource_group} --workspace-name {my_hub_name}
    ```
 
-7. Create a Project.
+8. Create a Project.
 
    - Run the following command to find your ARM ID:
 
