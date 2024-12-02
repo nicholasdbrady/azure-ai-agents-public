@@ -4,16 +4,15 @@ This QuickStart demonstrates how to quickly set up your first agent with Azure A
 
 ## Complete Azure prerequisites
 
-1. Insta
-2. Create an Azure Subscription for [free](https://azure.microsoft.com/free/ai-services/), if you don't have one already.
+1. Create an Azure Subscription for [free](https://azure.microsoft.com/free/ai-services/), if you don't have one already.
 
-3. Make sure all developers have the role: **Azure AI Developer** assigned at the appropriate level. [Learn more](https://learn.microsoft.com/azure/ai-studio/concepts/rbac-ai-studio)
+2. Make sure all developers have the role: **Azure AI Developer** assigned at the appropriate level. [Learn more](https://learn.microsoft.com/azure/ai-studio/concepts/rbac-ai-studio)
 
    If you're using a hub/project that already exists, check the [RBAC roles](./rbac.md).
 
-4. Install [the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli-windows?tabs=azure-cli). If you have the CLI already installed, make sure it's updated to the latest version.
+3. Install [the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli-windows?tabs=azure-cli). If you have the CLI already installed, make sure it's updated to the latest version.
 
-5. Register providers
+4. Register providers
 
    The following providers must be registered:
 
