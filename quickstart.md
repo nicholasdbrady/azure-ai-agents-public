@@ -24,13 +24,13 @@ This QuickStart demonstrates how to quickly set up your first agent with Azure A
    - To use Bing Search tool: Microsoft.Bing
 
    ```console
-   az provider register -–namespace 'Microsoft.KeyVault'
-   az provider register -–namespace 'Microsoft.CognitiveServices'
-   az provider register -–namespace 'Microsoft.Storage'
-   az provider register -–namespace 'Microsoft.MachineLearningServices'
-   az provider register -–namespace 'Microsoft.Search'
+   az provider register --namespace 'Microsoft.KeyVault'
+   az provider register --namespace 'Microsoft.CognitiveServices'
+   az provider register --namespace 'Microsoft.Storage'
+   az provider register --namespace 'Microsoft.MachineLearningServices'
+   az provider register --namespace 'Microsoft.Search'
    # only to use Grounding with Bing Search tool
-   az provider register -–namespace 'Microsoft.Bing'
+   az provider register --namespace 'Microsoft.Bing'
    ```
 
 ## Setup your Azure AI Hub and Agent project
