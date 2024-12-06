@@ -1,4 +1,4 @@
-// Execute this main file to depoy Azure AI studio resources in the basic security configuraiton
+// Execute this main file to deploy Standard Agent setup resources
 
 // Parameters
 @minLength(2)
@@ -9,7 +9,7 @@ param aiHubName string = 'hub-demo'
 @description('Friendly name for your Hub resource')
 param aiHubFriendlyName string = 'Agents Hub resource'
 
-@description('Description of your Azure AI resource dispayed in AI studio')
+@description('Description of your Azure AI resource displayed in AI studio')
 param aiHubDescription string = 'This is an example AI resource for use in Azure AI Studio.'
 
 @description('Name for the AI project resources.')
@@ -18,7 +18,7 @@ param aiProjectName string = 'project-demo'
 @description('Friendly name for your Azure AI resource')
 param aiProjectFriendlyName string = 'Agents Project resource'
 
-@description('Description of your Azure AI resource dispayed in AI studio')
+@description('Description of your Azure AI resource displayed in AI studio')
 param aiProjectDescription string = 'This is an example AI Project resource for use in Azure AI Studio.'
 
 @description('Azure region used for the deployment of all resources.')
@@ -65,7 +65,6 @@ param aiSearchServiceResourceId string = ''
 
 @description('The Ai Storage Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiStorageAccountResourceId string = ''
-
 
 // Variables
 var name = toLower('${aiHubName}')
