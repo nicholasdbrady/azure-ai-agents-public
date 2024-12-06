@@ -60,10 +60,10 @@ param modelLocation string = 'eastus'
 @description('The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiServiceAccountResourceId string = ''
 
-@description('The Ai Search Service full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
+@description('The AI Search Service full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiSearchServiceResourceId string = ''
 
-@description('The Ai Storage Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
+@description('The AI Storage Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiStorageAccountResourceId string = ''
 
 @description('The full ARM Bing Resource ID. This is an optional field, and if not provided, the resource will be created.')

@@ -1,4 +1,4 @@
-// Creates Azure dependent resources for Azure AI studio
+// Creates Azure dependent resources for the Azure AI Agent setup
 
 @description('Azure region of the deployment')
 param location string = resourceGroup().location
