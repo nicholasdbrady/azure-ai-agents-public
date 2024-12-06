@@ -45,6 +45,9 @@ param modelCapacity int = 50
 @description('Model deployment location. If you want to deploy an Azure AI resource/model in different location than the rest of the resources created.')
 param modelLocation string = 'eastus'
 
+@description('The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
+param aiServiceAccountResourceId string = ''
+
 // Variables
 var name = toLower('${aiHubName}')
 var projectName = toLower('${aiProjectName}')
@@ -66,6 +69,7 @@ module aiDependencies 'modules-basic/basic-dependent-resources.bicep' = {
   name: 'dependencies-${name}-${uniqueSuffix}-deployment'
   params: {
     aiServicesName: '${aiServicesName}${uniqueSuffix}'
+    aiServiceAccountResourceId: aiServiceAccountResourceId
     storageName: '${storageName}${uniqueSuffix}'
     location: location
     tags: tags
@@ -91,7 +95,9 @@ module aiHub 'modules-basic/basic-ai-hub-identity.bicep' = {
     tags: tags
 
     // dependent resources
-    modelLocation: modelLocation
+    aiServicesName: aiDependencies.outputs.aiServicesName
+    aiServiceAccountResourceGroupName: aiDependencies.outputs.aiServiceAccountResourceGroupName
+    aiServiceAccountSubscriptionId: aiDependencies.outputs.aiServiceAccountSubscriptionId
     storageAccountId: aiDependencies.outputs.storageId
     aiServicesId: aiDependencies.outputs.aiservicesID
     aiServicesTarget: aiDependencies.outputs.aiservicesTarget
@@ -113,3 +119,5 @@ module aiProject 'modules-basic/basic-ai-project-identity.bicep' = {
     aiHubId: aiHub.outputs.aiHubID
   }
 }
+
+output PROJECT_CONNECTION_STRING string = aiProject.outputs.projectConnectionString
