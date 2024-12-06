@@ -64,6 +64,12 @@ param aiServicesName string = 'agent-ai-services'
 param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
 var uniqueSuffix = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
 
+var aiServiceExists = aiServiceAccountResourceId != ''
+
+var aiServiceParts = split(aiServiceAccountResourceId, '/')
+var aiServiceAccountSubscriptionId = aiServiceExists ? aiServiceParts[2] : subscription().subscriptionId 
+var aiServiceAccountResourceGroupName = aiServiceExists ? aiServiceParts[4] : resourceGroup().name
+
 // Dependent resources for the Azure Machine Learning workspace
 module aiDependencies 'modules-basic/basic-dependent-resources.bicep' = {
   name: 'dependencies-${name}-${uniqueSuffix}-deployment'
@@ -117,6 +123,16 @@ module aiProject 'modules-basic/basic-ai-project-identity.bicep' = {
     // dependent resources
     aiServicesName: '${aiServicesName}${uniqueSuffix}'
     aiHubId: aiHub.outputs.aiHubID
+  }
+}
+
+module aiServiceRoleAssignments 'modules-standard/ai-service-role-assignments.bicep' = {
+  name: 'ai-service-role-assignments-${projectName}-${uniqueSuffix}-deployment'
+  scope: resourceGroup(aiServiceAccountSubscriptionId, aiServiceAccountResourceGroupName)
+  params: {
+    aiServicesName: aiDependencies.outputs.aiServicesName
+    aiProjectPrincipalId: aiProject.outputs.aiProjectPrincipalId
+    aiProjectId: aiProject.outputs.aiProjectResourceId
   }
 }
 
