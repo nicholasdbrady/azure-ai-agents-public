@@ -173,7 +173,7 @@ module aiProject 'modules-standard-bing/standard-ai-project-bing.bicep' = {
 
 module aiServiceRoleAssignments 'modules-standard-bing/ai-service-role-assignments-bing.bicep' = {
   name: 'ai-service-role-assignments-${projectName}-${uniqueSuffix}-deployment'
-  scope: resourceGroup(aiServiceAccountSubscriptionId, aiSearchServiceResourceGroupName)
+  scope: resourceGroup(aiServiceAccountSubscriptionId, aiServiceAccountResourceGroupName)
   params: {
     aiServicesName: aiDependencies.outputs.aiServicesName
     aiProjectPrincipalId: aiProject.outputs.aiProjectPrincipalId
@@ -183,7 +183,7 @@ module aiServiceRoleAssignments 'modules-standard-bing/ai-service-role-assignmen
 
 module aiSearchRoleAssignments 'modules-standard-bing/ai-search-role-assignments-bing.bicep' = {
   name: 'ai-search-role-assignments-${projectName}-${uniqueSuffix}-deployment'
-  scope: resourceGroup(aiSearchServiceSubscriptionId, aiServiceAccountResourceGroupName)
+  scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
   params: {
     aiSearchName: aiDependencies.outputs.aiSearchName
     aiProjectPrincipalId: aiProject.outputs.aiProjectPrincipalId
