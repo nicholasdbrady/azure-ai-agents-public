@@ -51,16 +51,16 @@ param aiSearchServiceResourceId string
 param aiStorageAccountResourceId string 
 
 @description('The name of the virtual network')
-param vnetName string = 'agents-vnet'
+param vnetName string = 'agents-vnet-${suffix}'
 
 @description('The name of Agents Subnet')
-param agentsSubnetName string = 'agents-subnet'
+param agentsSubnetName string = 'agents-subnet-${suffix}'
 
 @description('The name of Customer Hub subnet')
-param cxSubnetName string = 'hub-subnet'
+param cxSubnetName string = 'hub-subnet-${suffix}'
 
 @description('The name of User Assigned Identity')
-param userAssignedIdentityName string = 'secured-agents-identity'
+param userAssignedIdentityName string = 'secured-agents-identity-${suffix}'
 
 @description('The name of UAI Role Assignments')
 param userAssignedIdentityRoleAssignmentName string
@@ -81,7 +81,7 @@ var numberOfInstances = 1
 // Documentation: https://learn.microsoft.com/en-us/azure/templates/microsoft.managedidentity/userassignedidentities?pivots=deployment-language-bicep
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' = {
   location: location
-  name: '${userAssignedIdentityName}-${suffix}'
+  name: userAssignedIdentityName
 }
 
 //1b. Create role Definitions for UAI
@@ -156,7 +156,7 @@ resource userAssignedIdentityRoleAssignment 'Microsoft.Authorization/roleAssignm
 
 // Documentation: https://learn.microsoft.com/en-us/azure/templates/microsoft.network/virtualnetworks?pivots=deployment-language-bicep
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
-  name: '${vnetName}-${suffix}'
+  name: vnetName
   location: location
   properties: {
     addressSpace: {
@@ -166,7 +166,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
     }
     subnets: [
       {
-        name: '${cxSubnetName}-${suffix}'
+        name: cxSubnetName
         properties: {
           addressPrefix: '10.0.1.0/24'
           serviceEndpoints: [
@@ -192,7 +192,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
         }
       }
       {
-        name: '${agentsSubnetName}-${suffix}'
+        name: agentsSubnetName
         properties: {
           addressPrefix: '10.0.2.0/24'
           delegations: [
