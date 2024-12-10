@@ -48,6 +48,9 @@ param modelLocation string = 'eastus'
 @description('The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiServiceAccountResourceId string = ''
 
+@description('AI Service Account kind: either OpenAI or AIServices')
+param aiServiceKind string = 'AIServices'
+
 // Variables
 var name = toLower('${aiHubName}')
 var projectName = toLower('${aiProjectName}')
@@ -101,6 +104,7 @@ module aiHub 'modules-basic/basic-ai-hub-identity.bicep' = {
 
     // dependent resources
     aiServicesName: aiDependencies.outputs.aiServicesName
+    aiServiceKind: aiServiceKind
     aiServiceAccountResourceGroupName: aiDependencies.outputs.aiServiceAccountResourceGroupName
     aiServiceAccountSubscriptionId: aiDependencies.outputs.aiServiceAccountSubscriptionId
     storageAccountId: aiDependencies.outputs.storageId

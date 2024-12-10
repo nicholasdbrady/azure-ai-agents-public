@@ -33,6 +33,9 @@ param aiServiceAccountResourceGroupName string
 @description('Subscription ID of the AI Services resource')
 param aiServiceAccountSubscriptionId string
 
+@description('AI Service Account kind: either OpenAI or AIServices')
+param aiServiceKind string 
+
 resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: aiServicesName
   scope: resourceGroup(aiServiceAccountSubscriptionId, aiServiceAccountResourceGroupName)
@@ -58,7 +61,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-07-01-preview'
     resource aiServicesConnection 'connections@2024-07-01-preview' = {
     name: '${aiHubName}-connection-AIServices'
     properties: {
-      category: 'AIServices'
+      category: aiServiceKind
       target: aiServicesTarget
       authType: 'AAD'
       isSharedToAll: true
