@@ -18,12 +18,6 @@ param aiProjectDescription string
 @description('Resource ID of the AI Hub resource')
 param aiHubId string
 
-param aiServicesName string
-
-resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
-  name: aiServicesName
-}
-
 //for constructing project connection string
 var subscriptionId = subscription().subscriptionId
 var resourceGroupName = resourceGroup().name

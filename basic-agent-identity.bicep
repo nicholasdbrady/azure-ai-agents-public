@@ -58,7 +58,6 @@ param storageName string = 'agent-storage'
 @description('Name of the Azure AI Services account')
 param aiServicesName string = 'agent-ai-services'
 
-
 // Create a short, unique suffix, that will be unique to each resource group
 // var uniqueSuffix = substring(uniqueString(resourceGroup().id), 0, 4)
 param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
@@ -121,7 +120,6 @@ module aiProject 'modules-basic/basic-ai-project-identity.bicep' = {
     tags: tags
 
     // dependent resources
-    aiServicesName: '${aiServicesName}${uniqueSuffix}'
     aiHubId: aiHub.outputs.aiHubID
   }
 }
