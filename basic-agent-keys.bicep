@@ -61,7 +61,7 @@ param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
 var uniqueSuffix = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
 
 // Dependent resources for the Azure Machine Learning workspace
-module aiDependencies 'modules-basic/basic-dependent-resources.bicep' = {
+module aiDependencies 'modules-basic-keys/basic-dependent-resources-keys.bicep' = {
   name: 'dependencies-${name}-${uniqueSuffix}-deployment'
   params: {
     aiServicesName: '${aiServicesName}${uniqueSuffix}'
@@ -79,7 +79,7 @@ module aiDependencies 'modules-basic/basic-dependent-resources.bicep' = {
   }
 }
 
-module aiHub 'modules-basic/basic-ai-hub-keys.bicep' = {
+module aiHub 'modules-basic-keys/basic-ai-hub-keys.bicep' = {
   name: 'ai-${name}-${uniqueSuffix}-deployment'
   params: {
     // workspace organization
@@ -97,7 +97,7 @@ module aiHub 'modules-basic/basic-ai-hub-keys.bicep' = {
   }
 }
 
-module aiProject 'modules-basic/basic-ai-project-keys.bicep' = {
+module aiProject 'modules-basic-keys/basic-ai-project-keys.bicep' = {
   name: 'ai-${projectName}-${uniqueSuffix}-deployment'
   params: {
     // workspace organization
