@@ -41,16 +41,17 @@ param aiSearchServiceSubscriptionId string
 @description('Name for capabilityHost.')
 param capabilityHostName string = 'caphost1'
 
-param uaiId string
-param uaiPID string
-param uaiCID string
+param uaiName string
 
 param subnetId string
 
 var acsConnectionName = '${aiHubName}-connection-AISearch'
 
 var aoaiConnection  = '${aiHubName}-connection-AIServices_aoai'
-
+resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: uaiName
+}
+var userAssignedIdentities = json('{\'${userAssignedIdentity.id}\': {}}')
 
 resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: aiServicesName
@@ -69,10 +70,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview'
   kind: 'hub'
   tags: tags
   identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${uaiId}': {}
-    }
+    type: 'SystemAssigned'
   }
   properties: {
     // organization
@@ -84,6 +82,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview'
     keyVault: keyVaultId
     storageAccount: storageAccountId
   }
+  
 
   // Documentation: https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces/connections?tabs=bicep
   resource aiServicesConnection 'connections@2024-07-01-preview' = {
@@ -91,7 +90,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview'
     properties: {
       category: 'AIServices'
       target: aiServicesTarget
-      authType: 'ManagedIdentity'
+      authType: 'AAD'
       isSharedToAll: true
       metadata: {
         ApiType: 'Azure'
@@ -105,8 +104,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview'
     properties: {
       category: 'CognitiveSearch'
       target: 'https://${aiSearchName}.search.windows.net'
-      authType: 'ManagedIdentity'
-      //useWorkspaceManagedIdentity: false
+      authType: 'AAD'
       isSharedToAll: true
       metadata: {
         ApiType: 'Azure'

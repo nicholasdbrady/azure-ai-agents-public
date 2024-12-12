@@ -27,10 +27,7 @@ param acsConnectionName string
 @description('Name for ACS connection.')
 param aoaiConnectionName string
 
-param uaiId string
-param uaiPID string
-param uaiCID string
-
+param uaiName string
 param subnetId string
 
 //for constructing endpoint
@@ -44,6 +41,12 @@ var storageConnections = ['${aiProjectName}/workspaceblobstore']
 var aiSearchConnection = ['${acsConnectionName}']
 var aiServiceConnections = ['${aoaiConnectionName}']
 
+resource uai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' existing = {
+  name: uaiName
+  scope: resourceGroup()
+}
+
+
 // Documentation: https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?tabs=bicep
 resource aiProject 'Microsoft.MachineLearningServices/workspaces@2023-08-01-preview' = {
   name: aiProjectName
@@ -54,7 +57,7 @@ resource aiProject 'Microsoft.MachineLearningServices/workspaces@2023-08-01-prev
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      uaiId: {}
+      '${uai.id}': {}
     }
   }
   properties: {

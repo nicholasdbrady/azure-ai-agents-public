@@ -63,10 +63,6 @@ param aiServiceAccountResourceId string = ''
 @description('The Ai Search Service full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiSearchServiceResourceId string = ''
 
-@description('The Ai Storage Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
-param aiStorageAccountResourceId string = ''
-
-
 // Variables
 var name = toLower('${aiHubName}')
 var projectName = toLower('${aiProjectName}')
@@ -74,9 +70,10 @@ var projectName = toLower('${aiProjectName}')
 // Create a short, unique suffix, that will be unique to each resource group
 // var uniqueSuffix = substring(uniqueString(resourceGroup().id), 0, 4)
 param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
-var uniqueSuffix = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
+param uniqueSuffix string = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
 
-var userAssignedIdentityRoleAssignmentName = guid(uniqueString(resourceGroup().id, uniqueSuffix))
+@description('The name of User Assigned Identity')
+param userAssignedIdentityName string = 'secured-agents-identity-${uniqueSuffix}'
 
 var aiServiceExists = aiServiceAccountResourceId != ''
 var acsExists = aiSearchServiceResourceId != ''
@@ -88,6 +85,14 @@ var aiServiceAccountResourceGroupName = aiServiceExists ? aiServiceParts[4] : re
 var acsParts = split(aiSearchServiceResourceId, '/')
 var aiSearchServiceSubscriptionId = acsExists ? acsParts[2] : subscription().subscriptionId
 var aiSearchServiceResourceGroupName = acsExists ? acsParts[4] : resourceGroup().name
+
+module identity 'modules-network-secured/network-secured-identity.bicep' = {
+  name: 'identity-${name}-${uniqueSuffix}-deployment'
+  params: {
+    location: location
+    userAssignedIdentityName: userAssignedIdentityName
+  }
+}
 
 // Dependent resources for the Azure Machine Learning workspace
 module aiDependencies 'modules-network-secured/network-secured-dependent-resources.bicep' = {
@@ -109,14 +114,9 @@ module aiDependencies 'modules-network-secured/network-secured-dependent-resourc
      modelCapacity: modelCapacity  
      modelLocation: modelLocation
 
-     userAssignedIdentityRoleAssignmentName: userAssignedIdentityRoleAssignmentName
-     aiServiceAccountResourceId: aiServiceAccountResourceId
-     aiSearchServiceResourceId: aiSearchServiceResourceId
-     aiStorageAccountResourceId: aiStorageAccountResourceId
+     userAssignedIdentityName: userAssignedIdentityName
     }
 }
-
-
 
 module aiHub 'modules-network-secured/network-secured-ai-hub.bicep' = {
   name: '${name}-${uniqueSuffix}-deployment'
@@ -144,9 +144,7 @@ module aiHub 'modules-network-secured/network-secured-ai-hub.bicep' = {
     storageAccountId: aiDependencies.outputs.storageId
     subnetId: aiDependencies.outputs.agentSubnetId
     
-    uaiId: aiDependencies.outputs.uaiId
-    uaiPID: aiDependencies.outputs.uaiPrincipalId
-    uaiCID: aiDependencies.outputs.uaiClientId
+    uaiName: userAssignedIdentityName
   }
 }
 
@@ -168,9 +166,7 @@ module aiProject 'modules-network-secured/network-secured-ai-project.bicep' = {
     acsConnectionName: aiHub.outputs.acsConnectionName
     aoaiConnectionName: aiHub.outputs.aoaiConnectionName
     subnetId: aiDependencies.outputs.agentSubnetId
-    uaiId: aiDependencies.outputs.uaiId
-    uaiPID: aiDependencies.outputs.uaiPrincipalId
-    uaiCID: aiDependencies.outputs.uaiClientId
+    uaiName: userAssignedIdentityName
   }
 }
 
@@ -179,7 +175,7 @@ module aiServiceRoleAssignments 'modules-standard/ai-service-role-assignments.bi
   scope: resourceGroup(aiServiceAccountSubscriptionId, aiServiceAccountResourceGroupName)
   params: {
     aiServicesName: aiDependencies.outputs.aiServicesName
-    aiProjectPrincipalId: aiProject.outputs.aiProjectPrincipalId
+    aiProjectPrincipalId: identity.outputs.uaiPrincipalId
     aiProjectId: aiProject.outputs.aiProjectResourceId
   }
 }
@@ -189,7 +185,7 @@ module aiSearchRoleAssignments 'modules-standard/ai-search-role-assignments.bice
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
   params: {
     aiSearchName: aiDependencies.outputs.aiSearchName
-    aiProjectPrincipalId: aiProject.outputs.aiProjectPrincipalId
+    aiProjectPrincipalId: identity.outputs.uaiPrincipalId
     aiProjectId: aiProject.outputs.aiProjectResourceId
   }
 }
