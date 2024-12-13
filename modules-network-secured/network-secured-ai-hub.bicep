@@ -70,12 +70,14 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview'
   kind: 'hub'
   tags: tags
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: userAssignedIdentities
   }
   properties: {
     // organization
     friendlyName: aiHubFriendlyName
     description: aiHubDescription
+    primaryUserAssignedIdentity: userAssignedIdentity.id
 
     // dependent resources
     //allowPublicAccessWhenBehindVnet: false
