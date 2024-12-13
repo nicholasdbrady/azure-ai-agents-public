@@ -60,6 +60,9 @@ param modelLocation string = 'eastus'
 @description('The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiServiceAccountResourceId string = ''
 
+@description('AI Service Account kind: either OpenAI or AIServices')
+param aiServiceKind string = 'AIServices'
+
 @description('The AI Search Service full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiSearchServiceResourceId string = ''
 
@@ -136,6 +139,7 @@ module aiHub 'modules-standard-bing/standard-ai-hub-bing.bicep' = {
     aiSearchServiceSubscriptionId: aiDependencies.outputs.aiSearchServiceSubscriptionId
 
     aiServicesName: aiDependencies.outputs.aiServicesName
+    aiServiceKind: aiServiceKind
     aiServicesId: aiDependencies.outputs.aiservicesID
     aiServicesTarget: aiDependencies.outputs.aiservicesTarget
     aiServiceAccountResourceGroupName:aiDependencies.outputs.aiServiceAccountResourceGroupName

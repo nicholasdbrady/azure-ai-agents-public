@@ -23,25 +23,44 @@ param storageAccountId string
 
 @description('Resource ID of the AI Services resource')
 param aiServicesId string
+
 @description('Resource ID of the AI Services endpoint')
 param aiServicesTarget string
+
 @description('Name AI Services resource')
 param aiServicesName string
+
+@description('AI Service Account kind: either OpenAI or AIServices')
+param aiServiceKind string 
+
 @description('Resource Group name of the AI Services resource')
 param aiServiceAccountResourceGroupName string
+
 @description('Subscription ID of the AI Services resource')
 param aiServiceAccountSubscriptionId string
 
 @description('Name AI Search resource')
 param aiSearchName string
+
 @description('Resource ID of the AI Search resource')
 param aiSearchId string
+
+@description('Resource Group name of the AI Search resource')
 param aiSearchServiceResourceGroupName string
+
+@description('Subscription ID of the AI Search resource')
 param aiSearchServiceSubscriptionId string
 
+@description('Name Bing resource')
 param bingName string
+
+@description('Resource ID of the Bing resource')
 param bingId string
+
+@description('Resource Group name of the Bing resource')
 param bingResourceGroupName string
+
+@description('Subscription ID of the Bing resource')
 param bingSubscriptionId string
 
 
@@ -85,13 +104,14 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-07-01-preview'
     // dependent resources
     keyVault: keyVaultId
     storageAccount: storageAccountId
+    systemDatastoresAuthMode: 'identity'
   }
   kind: 'hub'
 
   resource aiServicesConnection 'connections@2024-07-01-preview' = {
     name: '${aiHubName}-connection-AIServices'
     properties: {
-      category: 'AIServices'
+      category: aiServiceKind // 'OpenAI' or 'AIServices'
       target: aiServicesTarget
       authType: 'AAD'
       isSharedToAll: true
