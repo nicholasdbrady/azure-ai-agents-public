@@ -73,6 +73,9 @@ var bingConnectionName = '${aiHubName}-connection-Bing'
 
 var aoaiConnection  = '${aiHubName}-connection-AIServices_aoai'
 
+var kindAIServicesExists = aiServiceKind == 'AIServices'
+
+var aiServiceConnectionName = kindAIServicesExists ? '${aiHubName}-connection-AIServices' : aoaiConnection
 
 resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: aiServicesName
@@ -109,7 +112,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-07-01-preview'
   kind: 'hub'
 
   resource aiServicesConnection 'connections@2024-07-01-preview' = {
-    name: '${aiHubName}-connection-AIServices'
+    name: aiServiceConnectionName
     properties: {
       category: aiServiceKind // 'OpenAI' or 'AIServices'
       target: aiServicesTarget
