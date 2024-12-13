@@ -40,13 +40,13 @@ param storageName string = 'agent-storage'
 param aiServicesName string = 'agent-ai-services'
 
 @description('Model name for deployment')
-param modelName string = 'gpt-4o-mini'
+param modelName string = 'gpt-4o'
 
 @description('Model format for deployment')
 param modelFormat string = 'OpenAI'
 
 @description('Model version for deployment')
-param modelVersion string = '2024-07-18'
+param modelVersion string = '2024-08-06'
 
 @description('Model deployment SKU name')
 param modelSkuName string = 'GlobalStandard'
@@ -60,7 +60,7 @@ param modelLocation string = 'eastus'
 @description('The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiServiceAccountResourceId string = ''
 
-@description('AI Service Account kind: either OpenAI or AIServices')
+@description('AI Service Account kind: either AzureOpenAI or AIServices')
 param aiServiceKind string = 'AIServices'
 
 @description('The AI Search Service full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
