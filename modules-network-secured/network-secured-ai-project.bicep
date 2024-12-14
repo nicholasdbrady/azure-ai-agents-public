@@ -64,10 +64,10 @@ resource aiProject 'Microsoft.MachineLearningServices/workspaces@2023-08-01-prev
     // organization
     friendlyName: aiProjectFriendlyName
     description: aiProjectDescription
+    primaryUserAssignedIdentity: uai.id
 
     // dependent resources
     hubResourceId: aiHubId
-  
   }
   kind: 'project'
 
@@ -80,7 +80,6 @@ resource aiProject 'Microsoft.MachineLearningServices/workspaces@2023-08-01-prev
       aiServicesConnections: aiServiceConnections
       vectorStoreConnections: aiSearchConnection
       storageConnections: storageConnections
-      customerSubnet: subnetId
     }
   }
 }
