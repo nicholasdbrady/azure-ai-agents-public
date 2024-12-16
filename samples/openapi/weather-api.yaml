@@ -1,0 +1,119 @@
+openapi: 3.0.1
+info:
+  title: Custom Weather API
+  description: API for fetching weather information using OpenWeatherMap.
+  version: 1.0.0
+servers:
+  - url: http://localhost/api  # Placeholder URL, not used in function calls
+paths:
+  /weather/current:
+    get:
+      summary: Get current weather
+      operationId: getCurrentWeather
+      parameters:
+        - name: location
+          in: query
+          required: true
+          description: Location to get weather for (city name)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current weather details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentWeatherResponse'
+  /weather/forecast:
+    get:
+      summary: Get weather forecast
+      operationId: getWeatherForecast
+      parameters:
+        - name: location
+          in: query
+          required: true
+          description: Location to get weather forecast for (city name)
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          required: true
+          description: Start date for the forecast (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: true
+          description: End date for the forecast (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Weather forecast details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastResponse'
+  /weather/temperatures:
+    post:
+      summary: Get temperatures for multiple locations
+      operationId: getTemperaturesForMultipleLocations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemperaturesRequest'
+      responses:
+        '200':
+          description: Temperatures for locations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemperaturesResponse'
+components:
+  schemas:
+    CurrentWeatherResponse:
+      type: object
+      properties:
+        location:
+          type: string
+        description:
+          type: string
+        temperature:
+          type: number
+        feels_like:
+          type: number
+    ForecastResponse:
+      type: object
+      properties:
+        forecasts:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              description:
+                type: string
+              temperature:
+                type: number
+    TemperaturesRequest:
+      type: object
+      properties:
+        locations:
+          type: array
+          items:
+            type: string
+      required:
+        - locations
+    TemperaturesResponse:
+      type: object
+      properties:
+        temperatures:
+          type: object
+          additionalProperties:
+            type: number

@@ -1,0 +1,921 @@
+---
+openapi: 3.0.1
+info:
+  title: OpenWeather One Call API 3.0
+  version: 1.0.0
+  description: The OpenWeather One Call API provides current weather data, forecasts,
+    and historical data. It is designed to allow easy migration from the Dark Sky
+    API.
+servers:
+- url: https://api.openweathermap.org
+  description: Main OpenWeather API Server
+security:
+- ApiKeyAuth: []
+paths:
+  "/data/3.0/onecall":
+    get:
+      summary: Current and Forecast Weather Data
+      description: Get current weather data, minute forecast for 1 hour, hourly forecast
+        for 48 hours, daily forecast for 8 days, and government weather alerts.
+      operationId: getCurrentAndForecast
+      parameters:
+      - name: lat
+        in: query
+        description: Latitude, decimal degrees (-90 to 90).
+        required: true
+        schema:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+        example: 33.44
+      - name: lon
+        in: query
+        description: Longitude, decimal degrees (-180 to 180).
+        required: true
+        schema:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+        example: -94.04
+      - name: exclude
+        in: query
+        description: 'Exclude some parts of the weather data from the API response.
+          Comma-separated list without spaces. Available values: current, minutely,
+          hourly, daily, alerts.'
+        required: false
+        schema:
+          type: string
+        example: hourly,daily
+      - name: units
+        in: query
+        description: 'Units of measurement. Available values: standard, metric, imperial.
+          Default is standard.'
+        required: false
+        schema:
+          type: string
+          enum:
+          - standard
+          - metric
+          - imperial
+        example: metric
+      - name: lang
+        in: query
+        description: Language of the output. See the list of supported languages in
+          the documentation.
+        required: false
+        schema:
+          type: string
+        example: en
+      responses:
+        '200':
+          description: Successful response with weather data.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/OneCallResponse"
+        '400':
+          description: Bad Request. Missing or invalid parameters.
+        '401':
+          description: Unauthorized. Invalid API key.
+        '429':
+          description: Too Many Requests. Exceeded API key's request quota.
+        5XX:
+          description: Server Error.
+  "/data/3.0/onecall/timemachine":
+    get:
+      summary: Historical Weather Data
+      description: Get historical weather data for a specific timestamp (from 1st
+        January 1979 till 4 days ahead).
+      operationId: getHistoricalData
+      parameters:
+      - name: lat
+        in: query
+        description: Latitude, decimal degrees (-90 to 90).
+        required: true
+        schema:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+        example: 39.099724
+      - name: lon
+        in: query
+        description: Longitude, decimal degrees (-180 to 180).
+        required: true
+        schema:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+        example: -94.578331
+      - name: dt
+        in: query
+        description: Timestamp in Unix format (UTC). Data is available from January
+          1st, 1979 till 4 days ahead.
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 1643803200
+      - name: units
+        in: query
+        description: 'Units of measurement. Available values: standard, metric, imperial.
+          Default is standard.'
+        required: false
+        schema:
+          type: string
+          enum:
+          - standard
+          - metric
+          - imperial
+        example: metric
+      - name: lang
+        in: query
+        description: Language of the output.
+        required: false
+        schema:
+          type: string
+        example: en
+      responses:
+        '200':
+          description: Successful response with historical weather data.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/OneCallTimemachineResponse"
+        '400':
+          description: Bad Request. Missing or invalid parameters.
+        '401':
+          description: Unauthorized. Invalid API key.
+        '429':
+          description: Too Many Requests. Exceeded API key's request quota.
+        5XX:
+          description: Server Error.
+  "/data/3.0/onecall/day_summary":
+    get:
+      summary: Daily Aggregated Data
+      description: Get aggregated weather data for a particular date from 2nd January
+        1979 till 1.5 years ahead forecast.
+      operationId: getDailyAggregation
+      parameters:
+      - name: lat
+        in: query
+        description: Latitude, decimal degrees (-90 to 90).
+        required: true
+        schema:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+        example: 39.099724
+      - name: lon
+        in: query
+        description: Longitude, decimal degrees (-180 to 180).
+        required: true
+        schema:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+        example: -94.578331
+      - name: date
+        in: query
+        description: Date in the YYYY-MM-DD format for which data is requested.
+        required: true
+        schema:
+          type: string
+          format: date
+        example: '2020-03-04'
+      - name: tz
+        in: query
+        description: Timezone in the ±XX:XX format. If not specified, the service
+          will detect timezone based on the location.
+        required: false
+        schema:
+          type: string
+          pattern: "^[+-](?:2[0-3]|[01]\\d):[0-5]\\d$"
+        example: "+02:00"
+      - name: units
+        in: query
+        description: 'Units of measurement. Available values: standard, metric, imperial.
+          Default is standard.'
+        required: false
+        schema:
+          type: string
+          enum:
+          - standard
+          - metric
+          - imperial
+        example: metric
+      - name: lang
+        in: query
+        description: Language of the output.
+        required: false
+        schema:
+          type: string
+        example: en
+      responses:
+        '200':
+          description: Successful response with daily aggregated data.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DaySummaryResponse"
+        '400':
+          description: Bad Request. Missing or invalid parameters.
+        '401':
+          description: Unauthorized. Invalid API key.
+        '429':
+          description: Too Many Requests. Exceeded API key's request quota.
+        5XX:
+          description: Server Error.
+  "/data/3.0/onecall/overview":
+    get:
+      summary: Weather Overview
+      description: Get a human-readable weather summary for today or tomorrow's forecast
+        utilizing OpenWeather AI technologies.
+      operationId: getWeatherOverview
+      parameters:
+      - name: lat
+        in: query
+        description: Latitude, decimal degrees (-90 to 90).
+        required: true
+        schema:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+        example: 51.509865
+      - name: lon
+        in: query
+        description: Longitude, decimal degrees (-180 to 180).
+        required: true
+        schema:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+        example: -0.118092
+      - name: date
+        in: query
+        description: Date in the YYYY-MM-DD format. Data is available for today and
+          tomorrow. If not specified, the current date will be used by default.
+        required: false
+        schema:
+          type: string
+          format: date
+        example: '2024-05-13'
+      - name: units
+        in: query
+        description: 'Units of measurement. Available values: standard, metric, imperial.
+          Default is standard.'
+        required: false
+        schema:
+          type: string
+          enum:
+          - standard
+          - metric
+          - imperial
+        example: metric
+      responses:
+        '200':
+          description: Successful response with weather overview.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/WeatherOverviewResponse"
+        '400':
+          description: Bad Request. Missing or invalid parameters.
+        '401':
+          description: Unauthorized. Invalid API key.
+        '429':
+          description: Too Many Requests. Exceeded API key's request quota.
+        5XX:
+          description: Server Error.
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: query
+      name: appid
+  schemas:
+    OneCallResponse:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: float
+          description: Latitude of the location.
+          example: 33.44
+        lon:
+          type: number
+          format: float
+          description: Longitude of the location.
+          example: -94.04
+        timezone:
+          type: string
+          description: Timezone name for the requested location.
+          example: America/Chicago
+        timezone_offset:
+          type: integer
+          description: Shift in seconds from UTC.
+          example: -18000
+        current:
+          "$ref": "#/components/schemas/CurrentWeather"
+        minutely:
+          type: array
+          description: Minute forecast weather data.
+          items:
+            "$ref": "#/components/schemas/MinutelyWeather"
+        hourly:
+          type: array
+          description: Hourly forecast weather data.
+          items:
+            "$ref": "#/components/schemas/HourlyWeather"
+        daily:
+          type: array
+          description: Daily forecast weather data.
+          items:
+            "$ref": "#/components/schemas/DailyWeather"
+        alerts:
+          type: array
+          description: National weather alerts data from major national weather warning
+            systems.
+          items:
+            "$ref": "#/components/schemas/WeatherAlert"
+      required:
+      - lat
+      - lon
+      - timezone
+      - timezone_offset
+    CurrentWeather:
+      type: object
+      properties:
+        dt:
+          type: integer
+          description: Current time, Unix, UTC.
+          example: 1684929490
+        sunrise:
+          type: integer
+          description: Sunrise time, Unix, UTC.
+          example: 1684926645
+        sunset:
+          type: integer
+          description: Sunset time, Unix, UTC.
+          example: 1684977332
+        temp:
+          type: number
+          description: Temperature.
+          example: 292.55
+        feels_like:
+          type: number
+          description: Temperature accounting for the human perception.
+          example: 292.87
+        pressure:
+          type: integer
+          description: Atmospheric pressure on the sea level, hPa.
+          example: 1014
+        humidity:
+          type: integer
+          description: Humidity, %.
+          example: 89
+        dew_point:
+          type: number
+          description: Dew point temperature.
+          example: 290.69
+        uvi:
+          type: number
+          description: Current UV index.
+          example: 0.16
+        clouds:
+          type: integer
+          description: Cloudiness, %.
+          example: 53
+        visibility:
+          type: integer
+          description: Average visibility, meters.
+          example: 10000
+        wind_speed:
+          type: number
+          description: Wind speed.
+          example: 3.13
+        wind_deg:
+          type: integer
+          description: Wind direction, degrees (meteorological).
+          example: 93
+        wind_gust:
+          type: number
+          description: Wind gust speed.
+          example: 6.71
+        weather:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Weather"
+      required:
+      - dt
+      - temp
+      - pressure
+      - humidity
+      - weather
+    MinutelyWeather:
+      type: object
+      properties:
+        dt:
+          type: integer
+          description: Time of the forecasted data, Unix, UTC.
+          example: 1684929540
+        precipitation:
+          type: number
+          description: Precipitation volume, mm.
+          example: 0
+      required:
+      - dt
+      - precipitation
+    HourlyWeather:
+      type: object
+      properties:
+        dt:
+          type: integer
+          description: Time of the forecasted data, Unix, UTC.
+          example: 1684926000
+        temp:
+          type: number
+          description: Temperature.
+          example: 292.01
+        feels_like:
+          type: number
+          description: Temperature accounting for the human perception.
+          example: 292.33
+        pressure:
+          type: integer
+          description: Atmospheric pressure on the sea level, hPa.
+          example: 1014
+        humidity:
+          type: integer
+          description: Humidity, %.
+          example: 91
+        dew_point:
+          type: number
+          description: Dew point temperature.
+          example: 290.51
+        uvi:
+          type: number
+          description: UV index.
+          example: 0
+        clouds:
+          type: integer
+          description: Cloudiness, %.
+          example: 54
+        visibility:
+          type: integer
+          description: Average visibility, meters.
+          example: 10000
+        wind_speed:
+          type: number
+          description: Wind speed.
+          example: 2.58
+        wind_deg:
+          type: integer
+          description: Wind direction, degrees (meteorological).
+          example: 86
+        wind_gust:
+          type: number
+          description: Wind gust speed.
+          example: 5.88
+        weather:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Weather"
+        pop:
+          type: number
+          description: Probability of precipitation.
+          example: 0.15
+      required:
+      - dt
+      - temp
+      - pressure
+      - humidity
+      - weather
+    DailyWeather:
+      type: object
+      properties:
+        dt:
+          type: integer
+          description: Time of the forecasted data, Unix, UTC.
+          example: 1684951200
+        sunrise:
+          type: integer
+          description: Sunrise time, Unix, UTC.
+          example: 1684926645
+        sunset:
+          type: integer
+          description: Sunset time, Unix, UTC.
+          example: 1684977332
+        moonrise:
+          type: integer
+          description: Moonrise time, Unix, UTC.
+          example: 1684941060
+        moonset:
+          type: integer
+          description: Moonset time, Unix, UTC.
+          example: 1684905480
+        moon_phase:
+          type: number
+          description: Moon phase.
+          example: 0.16
+        summary:
+          type: string
+          description: Human-readable description of the weather conditions for the
+            day.
+          example: Expect a day of partly cloudy with rain
+        temp:
+          "$ref": "#/components/schemas/DailyTemperature"
+        feels_like:
+          "$ref": "#/components/schemas/DailyFeelsLike"
+        pressure:
+          type: integer
+          description: Atmospheric pressure on the sea level, hPa.
+          example: 1016
+        humidity:
+          type: integer
+          description: Humidity, %.
+          example: 59
+        dew_point:
+          type: number
+          description: Dew point temperature.
+          example: 290.48
+        wind_speed:
+          type: number
+          description: Wind speed.
+          example: 3.98
+        wind_deg:
+          type: integer
+          description: Wind direction, degrees (meteorological).
+          example: 76
+        wind_gust:
+          type: number
+          description: Wind gust speed.
+          example: 8.92
+        weather:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Weather"
+        clouds:
+          type: integer
+          description: Cloudiness, %.
+          example: 92
+        pop:
+          type: number
+          description: Probability of precipitation.
+          example: 0.47
+        rain:
+          type: number
+          description: Precipitation volume, mm.
+          example: 0.15
+        uvi:
+          type: number
+          description: UV index.
+          example: 9.23
+      required:
+      - dt
+      - temp
+      - pressure
+      - humidity
+      - weather
+    DailyTemperature:
+      type: object
+      properties:
+        day:
+          type: number
+          description: Day temperature.
+          example: 299.03
+        min:
+          type: number
+          description: Minimum daily temperature.
+          example: 290.69
+        max:
+          type: number
+          description: Maximum daily temperature.
+          example: 300.35
+        night:
+          type: number
+          description: Night temperature.
+          example: 291.45
+        eve:
+          type: number
+          description: Evening temperature.
+          example: 297.51
+        morn:
+          type: number
+          description: Morning temperature.
+          example: 292.55
+    DailyFeelsLike:
+      type: object
+      properties:
+        day:
+          type: number
+          description: Feels like day temperature.
+          example: 299.21
+        night:
+          type: number
+          description: Feels like night temperature.
+          example: 291.37
+        eve:
+          type: number
+          description: Feels like evening temperature.
+          example: 297.86
+        morn:
+          type: number
+          description: Feels like morning temperature.
+          example: 292.87
+    Weather:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Weather condition id.
+          example: 500
+        main:
+          type: string
+          description: Group of weather parameters (Rain, Snow, etc.).
+          example: Rain
+        description:
+          type: string
+          description: Weather condition within the group.
+          example: light rain
+        icon:
+          type: string
+          description: Weather icon id.
+          example: 10d
+      required:
+      - id
+      - main
+      - description
+      - icon
+    WeatherAlert:
+      type: object
+      properties:
+        sender_name:
+          type: string
+          description: Name of the alert source.
+          example: NWS Philadelphia - Mount Holly
+        event:
+          type: string
+          description: Alert event name.
+          example: Small Craft Advisory
+        start:
+          type: integer
+          description: Start time of the alert, Unix, UTC.
+          example: 1684952747
+        end:
+          type: integer
+          description: End time of the alert, Unix, UTC.
+          example: 1684988747
+        description:
+          type: string
+          description: Description of the alert.
+          example: "...SMALL CRAFT ADVISORY REMAINS IN EFFECT..."
+        tags:
+          type: array
+          description: Type of severe weather.
+          items:
+            type: string
+      required:
+      - sender_name
+      - event
+      - start
+      - end
+      - description
+    OneCallTimemachineResponse:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: float
+          description: Latitude of the location.
+          example: 52.2297
+        lon:
+          type: number
+          format: float
+          description: Longitude of the location.
+          example: 21.0122
+        timezone:
+          type: string
+          description: Timezone name for the requested location.
+          example: Europe/Warsaw
+        timezone_offset:
+          type: integer
+          description: Shift in seconds from UTC.
+          example: 3600
+        data:
+          type: array
+          items:
+            "$ref": "#/components/schemas/HistoricalData"
+      required:
+      - lat
+      - lon
+      - timezone
+      - timezone_offset
+      - data
+    HistoricalData:
+      type: object
+      properties:
+        dt:
+          type: integer
+          description: Requested time, Unix, UTC.
+          example: 1645888976
+        sunrise:
+          type: integer
+          description: Sunrise time, Unix, UTC.
+          example: 1645853361
+        sunset:
+          type: integer
+          description: Sunset time, Unix, UTC.
+          example: 1645891727
+        temp:
+          type: number
+          description: Temperature.
+          example: 279.13
+        feels_like:
+          type: number
+          description: Temperature accounting for the human perception.
+          example: 276.44
+        pressure:
+          type: integer
+          description: Atmospheric pressure on the sea level, hPa.
+          example: 1029
+        humidity:
+          type: integer
+          description: Humidity, %.
+          example: 64
+        dew_point:
+          type: number
+          description: Dew point temperature.
+          example: 272.88
+        uvi:
+          type: number
+          description: UV index.
+          example: 0.06
+        clouds:
+          type: integer
+          description: Cloudiness, %.
+          example: 0
+        visibility:
+          type: integer
+          description: Average visibility, meters.
+          example: 10000
+        wind_speed:
+          type: number
+          description: Wind speed.
+          example: 3.6
+        wind_deg:
+          type: integer
+          description: Wind direction, degrees (meteorological).
+          example: 340
+        weather:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Weather"
+      required:
+      - dt
+      - temp
+      - pressure
+      - humidity
+      - weather
+    DaySummaryResponse:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: float
+          description: Latitude of the location.
+          example: 33
+        lon:
+          type: number
+          format: float
+          description: Longitude of the location.
+          example: 35
+        tz:
+          type: string
+          description: Timezone in the ±XX:XX format.
+          example: "+02:00"
+        date:
+          type: string
+          format: date
+          description: Date specified in the API request.
+          example: '2020-03-04'
+        units:
+          type: string
+          description: Units of measurement specified in the request.
+          example: standard
+        cloud_cover:
+          type: object
+          properties:
+            afternoon:
+              type: integer
+              description: Cloud cover at 12:00.
+              example: 0
+        humidity:
+          type: object
+          properties:
+            afternoon:
+              type: integer
+              description: Relative humidity at 12:00.
+              example: 33
+        precipitation:
+          type: object
+          properties:
+            total:
+              type: number
+              description: Total precipitation for the day.
+              example: 0
+        temperature:
+          type: object
+          properties:
+            min:
+              type: number
+              description: Minimum temperature for the day.
+              example: 286.48
+            max:
+              type: number
+              description: Maximum temperature for the day.
+              example: 299.24
+            afternoon:
+              type: number
+              description: Temperature at 12:00.
+              example: 296.15
+            night:
+              type: number
+              description: Temperature at 00:00.
+              example: 289.56
+            evening:
+              type: number
+              description: Temperature at 18:00.
+              example: 295.93
+            morning:
+              type: number
+              description: Temperature at 06:00.
+              example: 287.59
+        pressure:
+          type: object
+          properties:
+            afternoon:
+              type: integer
+              description: Atmospheric pressure at 12:00.
+              example: 1015
+        wind:
+          type: object
+          properties:
+            max:
+              type: object
+              properties:
+                speed:
+                  type: number
+                  description: Maximum wind speed for the day.
+                  example: 8.7
+                direction:
+                  type: integer
+                  description: Wind cardinal direction relevant to the maximum wind
+                    speed.
+                  example: 120
+      required:
+      - lat
+      - lon
+      - date
+    WeatherOverviewResponse:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: float
+          description: Latitude of the location.
+          example: 51.509865
+        lon:
+          type: number
+          format: float
+          description: Longitude of the location.
+          example: -0.118092
+        tz:
+          type: string
+          description: Timezone in the ±XX:XX format.
+          example: "+01:00"
+        date:
+          type: string
+          format: date
+          description: Date for which summary is generated.
+          example: '2024-05-13'
+        units:
+          type: string
+          description: Units of measurement specified in the request.
+          example: metric
+        weather_overview:
+          type: string
+          description: AI generated weather overview for the requested date.
+          example: The current weather is overcast with a temperature of 16°C...
+      required:
+      - lat
+      - lon
+      - date
+      - weather_overview

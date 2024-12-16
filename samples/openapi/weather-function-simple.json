@@ -1,0 +1,279 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "OpenWeather One Call API 3.0",
+      "version": "1.0.0",
+      "description": "The OpenWeather One Call API provides current weather data."
+    },
+    "servers": [
+      {
+        "url": "https://api.openweathermap.org",
+        "description": "Main OpenWeather API Server"
+      }
+    ],
+    "security": [
+      {
+        "ApiKeyAuth": []
+      }
+    ],
+    "paths": {
+      "/data/3.0/onecall": {
+        "get": {
+          "summary": "Current Weather Data",
+          "description": "Get current weather data and government weather alerts.",
+          "operationId": "getCurrentWeather",
+          "parameters": [
+            {
+              "name": "lat",
+              "in": "query",
+              "description": "Latitude, decimal degrees (-90 to 90).",
+              "required": true,
+              "schema": {
+                "type": "number",
+                "format": "float",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "example": 33.44
+            },
+            {
+              "name": "lon",
+              "in": "query",
+              "description": "Longitude, decimal degrees (-180 to 180).",
+              "required": true,
+              "schema": {
+                "type": "number",
+                "format": "float",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "example": -94.04
+            },
+            {
+              "name": "exclude",
+              "in": "query",
+              "description": "Exclude some parts of the weather data from the API response. To exclude minutely, hourly, and daily data, use 'minutely,hourly,daily'.",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "example": "minutely,hourly,daily"
+            },
+            {
+              "name": "units",
+              "in": "query",
+              "description": "Units of measurement. Available values: standard, metric, imperial. Default is standard.",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": ["standard", "metric", "imperial"]
+              },
+              "example": "metric"
+            },
+            {
+              "name": "lang",
+              "in": "query",
+              "description": "Language of the output.",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "example": "en"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response with current weather data and alerts.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OneCallCurrentResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request. Missing or invalid parameters."
+            },
+            "401": {
+              "description": "Unauthorized. Invalid API key."
+            },
+            "429": {
+              "description": "Too Many Requests. Exceeded API key's request quota."
+            },
+            "5XX": {
+              "description": "Server Error."
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "ApiKeyAuth": {
+          "type": "apiKey",
+          "in": "query",
+          "name": "appid"
+        }
+      },
+      "schemas": {
+        "OneCallCurrentResponse": {
+          "type": "object",
+          "properties": {
+            "lat": {
+              "type": "number",
+              "format": "float",
+              "description": "Latitude of the location."
+            },
+            "lon": {
+              "type": "number",
+              "format": "float",
+              "description": "Longitude of the location."
+            },
+            "timezone": {
+              "type": "string",
+              "description": "Timezone name for the requested location."
+            },
+            "timezone_offset": {
+              "type": "integer",
+              "description": "Shift in seconds from UTC."
+            },
+            "current": {
+              "$ref": "#/components/schemas/CurrentWeather"
+            },
+            "alerts": {
+              "type": "array",
+              "description": "National weather alerts data from major national weather warning systems.",
+              "items": {
+                "$ref": "#/components/schemas/WeatherAlert"
+              }
+            }
+          },
+          "required": ["lat", "lon", "timezone", "timezone_offset", "current"]
+        },
+        "CurrentWeather": {
+          "type": "object",
+          "properties": {
+            "dt": {
+              "type": "integer",
+              "description": "Current time, Unix, UTC."
+            },
+            "sunrise": {
+              "type": "integer",
+              "description": "Sunrise time, Unix, UTC."
+            },
+            "sunset": {
+              "type": "integer",
+              "description": "Sunset time, Unix, UTC."
+            },
+            "temp": {
+              "type": "number",
+              "description": "Temperature."
+            },
+            "feels_like": {
+              "type": "number",
+              "description": "Temperature accounting for the human perception."
+            },
+            "pressure": {
+              "type": "integer",
+              "description": "Atmospheric pressure on the sea level, hPa."
+            },
+            "humidity": {
+              "type": "integer",
+              "description": "Humidity, %."
+            },
+            "dew_point": {
+              "type": "number",
+              "description": "Dew point temperature."
+            },
+            "uvi": {
+              "type": "number",
+              "description": "Current UV index."
+            },
+            "clouds": {
+              "type": "integer",
+              "description": "Cloudiness, %."
+            },
+            "visibility": {
+              "type": "integer",
+              "description": "Average visibility, meters."
+            },
+            "wind_speed": {
+              "type": "number",
+              "description": "Wind speed."
+            },
+            "wind_deg": {
+              "type": "integer",
+              "description": "Wind direction, degrees (meteorological)."
+            },
+            "wind_gust": {
+              "type": "number",
+              "description": "Wind gust speed."
+            },
+            "weather": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Weather"
+              }
+            }
+          },
+          "required": ["dt", "temp", "pressure", "humidity", "weather"]
+        },
+        "Weather": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Weather condition id."
+            },
+            "main": {
+              "type": "string",
+              "description": "Group of weather parameters (Rain, Snow, etc.)."
+            },
+            "description": {
+              "type": "string",
+              "description": "Weather condition within the group."
+            },
+            "icon": {
+              "type": "string",
+              "description": "Weather icon id."
+            }
+          },
+          "required": ["id", "main", "description", "icon"]
+        },
+        "WeatherAlert": {
+          "type": "object",
+          "properties": {
+            "sender_name": {
+              "type": "string",
+              "description": "Name of the alert source."
+            },
+            "event": {
+              "type": "string",
+              "description": "Alert event name."
+            },
+            "start": {
+              "type": "integer",
+              "description": "Start time of the alert, Unix, UTC."
+            },
+            "end": {
+              "type": "integer",
+              "description": "End time of the alert, Unix, UTC."
+            },
+            "description": {
+              "type": "string",
+              "description": "Description of the alert."
+            },
+            "tags": {
+              "type": "array",
+              "description": "Type of severe weather.",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["sender_name", "event", "start", "end", "description"]
+        }
+      }
+    }
+  }

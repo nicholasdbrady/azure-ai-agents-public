@@ -1,0 +1,371 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "OpenWeather Geocoding API",
+    "version": "1.0.0",
+    "description": "The OpenWeather Geocoding API is a tool developed to ease the search for locations while working with geographic names and coordinates. It supports both direct and reverse geocoding methods."
+  },
+  "servers": [
+    {
+      "url": "http://api.openweathermap.org"
+    }
+  ],
+  "paths": {
+    "/geo/1.0/direct": {
+      "get": {
+        "summary": "Direct Geocoding",
+        "description": "Get geographical coordinates (latitude and longitude) by using the name of the location (city name or area name).",
+        "operationId": "directGeocoding",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "City name, state code (only for the US), and country code divided by comma. Please use ISO 3166 country codes.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "London"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of the locations in the API response (up to 5 results can be returned).",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 5
+            },
+            "example": 5
+          },
+          {
+            "name": "appid",
+            "in": "query",
+            "description": "Your unique API key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "your_api_key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of location information matching the query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeocodingResponse"
+                  }
+                },
+                "examples": {
+                  "London": {
+                    "summary": "Example response for London",
+                    "value": [
+                      {
+                        "name": "London",
+                        "local_names": {
+                          "en": "London",
+                          "ru": "Лондон",
+                          "ja": "ロンドン"
+                        },
+                        "lat": 51.5073219,
+                        "lon": -0.1276474,
+                        "country": "GB",
+                        "state": "England"
+                      },
+                      {
+                        "name": "City of London",
+                        "local_names": {
+                          "en": "City of London",
+                          "fr": "Cité de Londres",
+                          "ja": "シティ・オブ・ロンドン"
+                        },
+                        "lat": 51.5156177,
+                        "lon": -0.0919983,
+                        "country": "GB",
+                        "state": "England"
+                      },
+                      {
+                        "name": "London",
+                        "local_names": {
+                          "en": "London",
+                          "ru": "Лондон",
+                          "ja": "ロンドン"
+                        },
+                        "lat": 42.9832406,
+                        "lon": -81.243372,
+                        "country": "CA",
+                        "state": "Ontario"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "401": {
+            "description": "Invalid API key."
+          }
+        }
+      }
+    },
+    "/geo/1.0/zip": {
+      "get": {
+        "summary": "Geocoding by Zip/Post Code",
+        "description": "Get geographical coordinates by using zip/post code and country code.",
+        "operationId": "zipGeocoding",
+        "parameters": [
+          {
+            "name": "zip",
+            "in": "query",
+            "description": "Zip/post code and country code divided by comma. Please use ISO 3166 country codes.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "90210,US"
+          },
+          {
+            "name": "appid",
+            "in": "query",
+            "description": "Your unique API key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "your_api_key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location information for the specified zip/post code.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZipResponse"
+                },
+                "examples": {
+                  "90210": {
+                    "summary": "Example response for zip code 90210",
+                    "value": {
+                      "zip": "90210",
+                      "name": "Beverly Hills",
+                      "lat": 34.0901,
+                      "lon": -118.4065,
+                      "country": "US"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid zip/post code."
+          },
+          "401": {
+            "description": "Invalid API key."
+          }
+        }
+      }
+    },
+    "/geo/1.0/reverse": {
+      "get": {
+        "summary": "Reverse Geocoding",
+        "description": "Get location names by using geographical coordinates (latitude, longitude).",
+        "operationId": "reverseGeocoding",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Geographical coordinate (latitude).",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "float"
+            },
+            "example": 51.5098
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "description": "Geographical coordinate (longitude).",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "float"
+            },
+            "example": -0.1180
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of the location names in the API response (several results can be returned).",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 5
+          },
+          {
+            "name": "appid",
+            "in": "query",
+            "description": "Your unique API key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "your_api_key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of location information matching the coordinates.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeocodingResponse"
+                  }
+                },
+                "examples": {
+                  "LondonCoordinates": {
+                    "summary": "Example response for coordinates of London",
+                    "value": [
+                      {
+                        "name": "City of London",
+                        "local_names": {
+                          "en": "City of London",
+                          "fr": "Cité de Londres",
+                          "ja": "シティ・オブ・ロンドン"
+                        },
+                        "lat": 51.5128,
+                        "lon": -0.0918,
+                        "country": "GB"
+                      },
+                      {
+                        "name": "London",
+                        "local_names": {
+                          "en": "London",
+                          "ru": "Лондон",
+                          "ja": "ロンドン"
+                        },
+                        "lat": 51.5085,
+                        "lon": -0.1257,
+                        "country": "GB"
+                      },
+                      {
+                        "name": "Islington",
+                        "local_names": {
+                          "en": "Islington",
+                          "ru": "Ислингтон"
+                        },
+                        "lat": 51.5362,
+                        "lon": -0.103,
+                        "country": "GB"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid coordinates."
+          },
+          "401": {
+            "description": "Invalid API key."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GeocodingResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the found location."
+          },
+          "local_names": {
+            "type": "object",
+            "description": "Names of the found location in different languages.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "en": "London",
+              "ru": "Лондон",
+              "ja": "ロンドン"
+            }
+          },
+          "lat": {
+            "type": "number",
+            "format": "float",
+            "description": "Geographical coordinate (latitude).",
+            "example": 51.5073219
+          },
+          "lon": {
+            "type": "number",
+            "format": "float",
+            "description": "Geographical coordinate (longitude).",
+            "example": -0.1276474
+          },
+          "country": {
+            "type": "string",
+            "description": "Country code of the found location.",
+            "example": "GB"
+          },
+          "state": {
+            "type": "string",
+            "description": "State of the found location (if available).",
+            "nullable": true,
+            "example": "England"
+          }
+        },
+        "required": ["name", "lat", "lon", "country"]
+      },
+      "ZipResponse": {
+        "type": "object",
+        "properties": {
+          "zip": {
+            "type": "string",
+            "description": "Zip/post code specified in the API request.",
+            "example": "90210"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the found area.",
+            "example": "Beverly Hills"
+          },
+          "lat": {
+            "type": "number",
+            "format": "float",
+            "description": "Geographical coordinate (latitude).",
+            "example": 34.0901
+          },
+          "lon": {
+            "type": "number",
+            "format": "float",
+            "description": "Geographical coordinate (longitude).",
+            "example": -118.4065
+          },
+          "country": {
+            "type": "string",
+            "description": "Country code of the found area.",
+            "example": "US"
+          }
+        },
+        "required": ["zip", "name", "lat", "lon", "country"]
+      }
+    }
+  }
+}
