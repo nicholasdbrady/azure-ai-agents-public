@@ -23,28 +23,59 @@ param storageAccountId string
 
 @description('Resource ID of the AI Services resource')
 param aiServicesId string
+
 @description('Resource ID of the AI Services endpoint')
 param aiServicesTarget string
+
 @description('Name AI Services resource')
 param aiServicesName string
+
+@description('AI Service Account kind: either OpenAI or AIServices')
+param aiServiceKind string 
+
 @description('Resource Group name of the AI Services resource')
 param aiServiceAccountResourceGroupName string
+
 @description('Subscription ID of the AI Services resource')
 param aiServiceAccountSubscriptionId string
 
 @description('Name AI Search resource')
 param aiSearchName string
+
 @description('Resource ID of the AI Search resource')
 param aiSearchId string
+
+@description('Resource Group name of the AI Search resource')
 param aiSearchServiceResourceGroupName string
+
+@description('Subscription ID of the AI Search resource')
 param aiSearchServiceSubscriptionId string
+
+@description('Name Bing resource')
+param bingName string
+
+@description('Resource ID of the Bing resource')
+param bingId string
+
+@description('Resource Group name of the Bing resource')
+param bingResourceGroupName string
+
+@description('Subscription ID of the Bing resource')
+param bingSubscriptionId string
+
+
 @description('Name for capabilityHost.')
 param capabilityHostName string = 'caphost1'
 
 var acsConnectionName = '${aiHubName}-connection-AISearch'
 
+var bingConnectionName = '${aiHubName}-connection-Bing'
+
 var aoaiConnection  = '${aiHubName}-connection-AIServices_aoai'
 
+var kindAIServicesExists = aiServiceKind == 'AIServices'
+
+var aiServiceConnectionName = kindAIServicesExists ? '${aiHubName}-connection-AIServices' : aoaiConnection
 
 resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: aiServicesName
@@ -54,6 +85,11 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing =
 resource searchService 'Microsoft.Search/searchServices@2023-11-01' existing = {
   name: aiSearchName
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
+}
+
+resource bingSearch 'Microsoft.Bing/accounts@2020-06-10' existing = {
+  name: bingName
+  scope: resourceGroup(bingSubscriptionId, bingResourceGroupName)
 }
 
 resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-07-01-preview' = {
@@ -71,13 +107,14 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-07-01-preview'
     // dependent resources
     keyVault: keyVaultId
     storageAccount: storageAccountId
+    systemDatastoresAuthMode: 'identity'
   }
   kind: 'hub'
 
   resource aiServicesConnection 'connections@2024-07-01-preview' = {
-    name: '${aiHubName}-connection-AIServices'
+    name: aiServiceConnectionName
     properties: {
-      category: 'AIServices'
+      category: aiServiceKind // 'OpenAI' or 'AIServices'
       target: aiServicesTarget
       authType: 'AAD'
       isSharedToAll: true
@@ -100,6 +137,24 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-07-01-preview'
         ApiType: 'Azure'
         ResourceId: aiSearchId
         location: searchService.location
+      }
+    }
+  }
+
+  resource hub_connection_bing 'connections@2024-07-01-preview' = {
+    name: bingConnectionName
+    properties: {
+      category: 'ApiKey'
+      target: 'https://api.bing.microsoft.com/'
+      authType: 'ApiKey'
+      isSharedToAll: true
+      credentials: {
+        key: '${listKeys(bingId, '2020-06-10').key1}'
+      }
+      metadata: {
+        ApiType: 'Azure'
+        ResourceId: bingId
+        location: bingSearch.location
       }
     }
   }

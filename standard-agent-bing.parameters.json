@@ -56,12 +56,20 @@
       "aiServiceAccountResourceId": {
         "value": ""
       },
+      "aiServiceKind": {
+        "value": "AIServices"
+      },
       "aiSearchServiceResourceId": {
         "value": ""
       },
       "aiStorageAccountResourceId":{
         "value": ""
+      },
+      "bingSearchResourceID" : {
+        "value": ""
+      },
+      "bingName" : {
+        "value": "agent-bing-search"
       }
     }
   }
-  

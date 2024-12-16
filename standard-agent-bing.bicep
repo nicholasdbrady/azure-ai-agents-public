@@ -40,13 +40,13 @@ param storageName string = 'agent-storage'
 param aiServicesName string = 'agent-ai-services'
 
 @description('Model name for deployment')
-param modelName string = 'gpt-4o-mini'
+param modelName string = 'gpt-4o'
 
 @description('Model format for deployment')
 param modelFormat string = 'OpenAI'
 
 @description('Model version for deployment')
-param modelVersion string = '2024-07-18'
+param modelVersion string = '2024-08-06'
 
 @description('Model deployment SKU name')
 param modelSkuName string = 'GlobalStandard'
@@ -60,11 +60,20 @@ param modelLocation string = 'eastus'
 @description('The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiServiceAccountResourceId string = ''
 
-@description('The Ai Search Service full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
+@description('AI Service Account kind: either AzureOpenAI or AIServices')
+param aiServiceKind string = 'AIServices'
+
+@description('The AI Search Service full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiSearchServiceResourceId string = ''
 
-@description('The Ai Storage Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
+@description('The AI Storage Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiStorageAccountResourceId string = ''
+
+@description('The full ARM Bing Resource ID. This is an optional field, and if not provided, the resource will be created.')
+param bingSearchResourceID string = ''
+
+@description('The Bing Search resource name')
+param bingName string = 'agent-bing-search'
 
 // Variables
 var name = toLower('${aiHubName}')
@@ -87,7 +96,7 @@ var aiSearchServiceSubscriptionId = acsExists ? acsParts[2] : subscription().sub
 var aiSearchServiceResourceGroupName = acsExists ? acsParts[4] : resourceGroup().name
 
 // Dependent resources for the Azure Machine Learning workspace
-module aiDependencies 'modules-standard/standard-dependent-resources.bicep' = {
+module aiDependencies 'modules-standard-bing/standard-dependent-resources-bing.bicep' = {
   name: 'dependencies-${name}-${uniqueSuffix}-deployment'
   params: {
     location: location
@@ -95,6 +104,7 @@ module aiDependencies 'modules-standard/standard-dependent-resources.bicep' = {
     keyvaultName: 'kv-${name}-${uniqueSuffix}'
     aiServicesName: '${aiServicesName}${uniqueSuffix}'
     aiSearchName: '${aiSearchName}-${uniqueSuffix}'
+    bingName: '${bingName}-${uniqueSuffix}'
     tags: tags
 
      // Model deployment parameters
@@ -108,10 +118,11 @@ module aiDependencies 'modules-standard/standard-dependent-resources.bicep' = {
      aiServiceAccountResourceId: aiServiceAccountResourceId
      aiSearchServiceResourceId: aiSearchServiceResourceId
      aiStorageAccountResourceId: aiStorageAccountResourceId
+     bingSearchResourceID: bingSearchResourceID
     }
 }
 
-module aiHub 'modules-standard/standard-ai-hub.bicep' = {
+module aiHub 'modules-standard-bing/standard-ai-hub-bing.bicep' = {
   name: '${name}-${uniqueSuffix}-deployment'
   params: {
     // workspace organization
@@ -128,10 +139,16 @@ module aiHub 'modules-standard/standard-ai-hub.bicep' = {
     aiSearchServiceSubscriptionId: aiDependencies.outputs.aiSearchServiceSubscriptionId
 
     aiServicesName: aiDependencies.outputs.aiServicesName
+    aiServiceKind: aiServiceKind
     aiServicesId: aiDependencies.outputs.aiservicesID
     aiServicesTarget: aiDependencies.outputs.aiservicesTarget
     aiServiceAccountResourceGroupName:aiDependencies.outputs.aiServiceAccountResourceGroupName
     aiServiceAccountSubscriptionId:aiDependencies.outputs.aiServiceAccountSubscriptionId
+
+    bingName: aiDependencies.outputs.bingName
+    bingId: aiDependencies.outputs.bingId
+    bingResourceGroupName: aiDependencies.outputs.bingResourceGroupName
+    bingSubscriptionId: aiDependencies.outputs.bingSubscriptionId
     
     keyVaultId: aiDependencies.outputs.keyvaultId
     storageAccountId: aiDependencies.outputs.storageId
@@ -139,7 +156,7 @@ module aiHub 'modules-standard/standard-ai-hub.bicep' = {
 }
 
 
-module aiProject 'modules-standard/standard-ai-project.bicep' = {
+module aiProject 'modules-standard-bing/standard-ai-project-bing.bicep' = {
   name: '${projectName}-${uniqueSuffix}-deployment'
   params: {
     // workspace organization
@@ -158,7 +175,7 @@ module aiProject 'modules-standard/standard-ai-project.bicep' = {
   }
 }
 
-module aiServiceRoleAssignments 'modules-standard/ai-service-role-assignments.bicep' = {
+module aiServiceRoleAssignments 'modules-standard-bing/ai-service-role-assignments-bing.bicep' = {
   name: 'ai-service-role-assignments-${projectName}-${uniqueSuffix}-deployment'
   scope: resourceGroup(aiServiceAccountSubscriptionId, aiServiceAccountResourceGroupName)
   params: {
@@ -168,7 +185,7 @@ module aiServiceRoleAssignments 'modules-standard/ai-service-role-assignments.bi
   }
 }
 
-module aiSearchRoleAssignments 'modules-standard/ai-search-role-assignments.bicep' = {
+module aiSearchRoleAssignments 'modules-standard-bing/ai-search-role-assignments-bing.bicep' = {
   name: 'ai-search-role-assignments-${projectName}-${uniqueSuffix}-deployment'
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
   params: {

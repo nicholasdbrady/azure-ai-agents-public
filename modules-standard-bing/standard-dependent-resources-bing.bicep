@@ -1,4 +1,4 @@
-// Creates Azure dependent resources for Azure AI studio
+// Creates Azure dependent resources for the Azure AI Agent setup
 
 @description('Azure region of the deployment')
 param location string = resourceGroup().location
@@ -47,9 +47,16 @@ param aiSearchServiceResourceId string
 @description('The AI Storage Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiStorageAccountResourceId string 
 
+@description('The full ARM Bing Resource ID. This is an optional field, and if not provided, the resource will be created.')
+param bingSearchResourceID string
+
+@description('The Bing Search resource name')
+param bingName string = 'agent-bing-search'
+
 var aiServiceExists = aiServiceAccountResourceId != ''
 var acsExists = aiSearchServiceResourceId != ''
 var aiStorageExists = aiStorageAccountResourceId != ''
+var bingExists = bingSearchResourceID != ''
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: keyvaultName
@@ -76,6 +83,20 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   }
 }
 
+var bingParts = split(bingSearchResourceID, '/')
+resource existingBingResource 'Microsoft.Bing/accounts@2020-06-10' existing = if (bingExists) {
+  name: bingParts[8]
+  scope: resourceGroup(bingParts[2], bingParts[4])
+}
+
+resource bingSearch 'Microsoft.Bing/accounts@2020-06-10' = if (!bingExists) {
+  name: bingName
+  location: 'global'
+  sku: {
+    name: 'G1'
+  }
+  kind: 'Bing.Grounding'
+}
 
 var aiServiceParts = split(aiServiceAccountResourceId, '/')
 
@@ -192,5 +213,10 @@ output storageAccountName string = aiStorageExists ? existingAIStorageAccount.na
 output storageId string =  aiStorageExists ? existingAIStorageAccount.id :  storage.id
 output storageAccountResourceGroupName string = aiStorageExists ? aiStorageParts[4] : resourceGroup().name
 output storageAccountSubscriptionId string = aiStorageExists ? aiStorageParts[2] : subscription().subscriptionId
+
+output bingName string = bingExists ? existingBingResource.name : bingSearch.name
+output bingId string = bingExists ? existingBingResource.id : bingSearch.id
+output bingResourceGroupName string = bingExists ? bingParts[4] : resourceGroup().name
+output bingSubscriptionId string = bingExists ? bingParts[2] : subscription().subscriptionId
 
 output keyvaultId string = keyVault.id

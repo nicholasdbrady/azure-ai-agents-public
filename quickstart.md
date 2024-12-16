@@ -6,9 +6,32 @@ This QuickStart demonstrates how to quickly set up your first agent with Azure A
 
 1. Create an Azure Subscription for [free](https://azure.microsoft.com/free/ai-services/), if you don't have one already.
 
-2. Make sure all developers have the role: **Azure AI Developer** assigned at the hub level. [Learn more](https://learn.microsoft.com/azure/ai-studio/concepts/rbac-ai-studio)
+2. Make sure all developers have the role: **Azure AI Developer** assigned at the appropriate level. [Learn more](https://learn.microsoft.com/azure/ai-studio/concepts/rbac-ai-studio)
 
    If you're using a hub/project that already exists, check the [RBAC roles](./rbac.md).
+
+3. Install [the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli-windows?tabs=azure-cli). If you have the CLI already installed, make sure it's updated to the latest version.
+
+4. Register providers
+
+   The following providers must be registered:
+
+   - Microsoft.KeyVault
+   - Microsoft.CognitiveServices
+   - Microsoft.Storage
+   - Microsoft.MachineLearningServices
+   - Microsoft.Search
+   - To use Bing Search tool: Microsoft.Bing
+
+   ```console
+   az provider register --namespace 'Microsoft.KeyVault'
+   az provider register --namespace 'Microsoft.CognitiveServices'
+   az provider register --namespace 'Microsoft.Storage'
+   az provider register --namespace 'Microsoft.MachineLearningServices'
+   az provider register --namespace 'Microsoft.Search'
+   # only to use Grounding with Bing Search tool
+   az provider register --namespace 'Microsoft.Bing'
+   ```
 
 ## Setup your Azure AI Hub and Agent project
 
@@ -22,27 +45,25 @@ The following section will show you how to set up an [Azure AI hub and project](
 
 If you already have these resources set up, skip to the [configure and run your first agent section below](#configure-and-run-your-first-agent).
 
-### Follow these steps to set up hub and project
+### Choose Basic or Standard Agent Setup
 
-1. Install [the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli-windows?tabs=azure-cli). If you have the CLI already installed, make sure it's updated to the latest version.
+**Basic Setup** : Agents use multi-tenant search and storage resources fully managed by Microsoft. You won’t have visibility or control over these underlying Azure resources. 
+- Resources for the hub, project, storage account, and AI Services will be created for you. The AI Services account will be connected to your project/hub and a gpt-4o-mini model will be deployed in the eastus region. A Microsoft-managed key vault will be used by default. 
 
-1. Register providers.
+**Standard Setup**: Agents use customer-owned, single-tenant search and storage resources. With this setup, you have full control and visibility over these resources, but you will incur costs based on your usage.
+- Resources for the hub, project, storage account, key vault, AI Services, and Azure AI Search will be created for you. The AI Services, AI Search, and Azure Blob Storage account will be connected to your project/hub and a gpt-4o-mini model will be deployed in the eastus region.  
 
-   The following providers must be registered:
 
-   - Microsoft.KeyVault
-   - Microsoft.CognitiveServices
-   - Microsoft.Storage
-   - Microsoft.MachineLearningServices
-   - Microsoft.Search
+| Template | Description   | Auto-deploy |
+| ------------------- | -----------------------------------------------| -----------------------|
+|`basic-agent-identity.bicep`| Deploy a basic agent setup that uses Managed Identity authentication on the AI Services/AOAI connection. | [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-quickstart-templates%2Fmaster%2Fquickstarts%2Fmicrosoft.azure-ai-agent-service%2Fbasic-agent-identity%2Fazuredeploy.json)
+| `standard-agent.bicep`  | Deploy a standard agent setup that uses Managed Identity authentication on the AI Services/AOAI connection. | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-quickstart-templates%2Frefs%2Fheads%2Fmaster%2Fquickstarts%2Fmicrosoft.azure-ai-agent-service%2Fstandard-agent%2Fazuredeploy.json)
 
-   ```console
-   az provider register –namespace  {my_resource_namespace}
-                        [--accept-terms]
-                        [--consent-to-permissions]
-                        [--management-group-id]
-                        [--wait]
-   ```
+
+**Manually Deploy Templates**
+
+<details>
+<summary><b>Option 1</b>: Use basic agent setup.</summary>
 
 1. To authenticate to your Azure subscription from the Azure CLI, use the following command:
 
@@ -53,184 +74,105 @@ If you already have these resources set up, skip to the [configure and run your 
    az login
    ```
 
-1. Create a resource group:
+2. Create a resource group:
 
    ```console
    az group create --name {my_resource_group} --location eastus
    ```
 
-1. Choose Basic or Standard Agent Setup
-    <br> 
+   Make sure you have the role **Azure AI Developer** on the resource group you just created.
+3. Download the `basic-agent-keys.bicep` file, `basic-agent-identity.bicep` file, and the `modules-basic` folder to your project directory. Your directory should look like this
 
-    **Basic Setup**:  Agents use multi-tenant search and storage resources fully managed by Microsoft. You won’t have visibility or control over these underlying Azure resources.
+    ```console
+    /my-project
+        - basic-agent-keys.bicep
+        - basic-agent-identity.bicep
+        - basic-agent.parameters.json
+        /modules-basic
+            - basic-ai-hub-keys.bicep
+            - basic-ai-project-keys.bicep
+            - basic-ai-hub-identity.bicep
+            - basic-ai-project-identity.bicep
+            - basic-dependent-resources.bicep
+    ```
+4. Before deploying resources, decide which configuration file to use:
+    - `basic-agent-keys.bicep`: Uses API key authentication on the AI Services/AOAI connection.
+    - `basic-agent-identity.bicep`: Uses Managed Identity authentication on the AI Services/AOAI connection.
 
-    **Standard Setup**: Agents use customer-owned, single-tenant search and storage resources. With this setup, you have full control and visibility over these resources, but you will incur costs based on your usage.
+5. Using the resource group you created in the previous step and one of the template files (either basic-agent-keys.bicep or basic-agent-identity.bicep), run one of the following commands:
 
-    <br>
+    - To use default resource names, run:
 
-    <details>
-    <summary><b>Option 1</b>: Use basic agent setup.</summary>
+    ```console
+    az deployment group create --resource-group {my_resource_group} --template-file {my-template-file.bicep}
+    ```
 
-    - Download the `basic-agent-keys.bicep` file, `basic-agent-identity.bicep` file, and the `modules-basic` folder to your project directory. Your directory should look like this
+    - To specify custom names for the hub, project, storage account, and/or Azure AI service resources (Note: a randomly generated suffix will be added to prevent accidental duplication), run:
 
-        ```console
-        /my-project
-            - basic-agent-keys.bicep
-            - basic-agent-identity.bicep
-            - basic-agent.parameters.json
-            /modules-basic
-                - basic-ai-hub-keys.bicep
-                - basic-ai-project-keys.bicep
-                - basic-ai-hub-identity.bicep
-                - basic-ai-project-identity.bicep
-                - basic-dependent-resources.bicep
-        ```
+    ```console
+    az deployment group create --resource-group {my_resource_group} --template-file {my-template-file.bicep} --parameters aiHubName='your-hub-name' aiProjectName='your-project-name' storageName='your-storage-name' aiServicesName='your-ai-services-name'
+    ```
 
-    - Before deploying resources, decide which configuration file to use:
-        - `basic-agent-keys.bicep`: Use this file to use API keys for authentication.
-        - `basic-agent-identity.bicep`: Use this file if you prefer Managed Identity to securely access resources without API keys.
+    - To customize additional parameters, including the OpenAI model deployment, download and edit the `basic-agent.parameters.json` file, then run:
 
+    ```console
+    az deployment group create --resource-group {my_resource_group} --template-file  {my-template-file.bicep} --parameters @basic-agent.parameters.json
+    ```
 
-    - Using the resource group you created in the previous step and one of the template files (either basic-agent-keys.bicep or basic-agent-identity.bicep), run one of the following commands:
+Resources for the hub, project, storage account, and AI Services will be created for you. The AI Services account will be connected to your project/hub and a gpt-4o-mini model will be deployed in the eastus region. A Microsoft-managed key vault will be used by default. To deploy a Llama model see [here](https://github.com/Azure/azure-ai-agents/blob/main/samples/llama-3.md).
 
-        - To use default resource names, run:
+</details>
 
-        ```console
-        az deployment group create --resource-group {my_resource_group} --template-file {my-template-file.bicep}
-        ```
-
-        - To specify custom names for the hub, project, storage account, and/or Azure AI service resources (Note: a randomly generated suffix will be added to prevent accidental duplication), run:
-
-        ```console
-        az deployment group create --resource-group {my_resource_group} --template-file {my-template-file.bicep} --parameters aiHubName='your-hub-name' aiProjectName='your-project-name' storageName='your-storage-name' aiServicesName='your-ai-services-name'
-        ```
-
-        - To customize additional parameters, including the OpenAI model deployment, download and edit the `basic-agent.parameters.json` file, then run:
-
-        ```console
-        az deployment group create --resource-group {my_resource_group} --template-file  {my-template-file.bicep} --parameters @basic-agent.parameters.json
-        ```
-
-    Resources for the hub, project, storage account, and AI Services will be created for you. The AI Services account will be connected to your project/hub and a gpt-4o-mini model will be deployed in the eastus region. A Microsoft-managed key vault will be used by default.
-
-    </details>
-
-
-    <details>
-        <summary><b>Option 2</b>: Use standard agent setup.</summary>
-       
-    - Download the `standard-agent.bicep` file, the `standard-agent.parameters.json` file, and the `modules-standard` folder to your project directory. Your directory should look like this
-
-        ```console
-        /my-project
-            - standard-agent.bicep
-            - standard-agent.parameters.json 
-            /modules-standard
-                - standard-ai-hub.bicep
-                - standard-ai-project.bicep
-                - standard-dependent-resources.bicep
-        ```
-     - Using the resource group you created in the previous step, run one of the following commands:
-
-        - To use default resource names, run:
-
-        ```console
-        az deployment group create --resource-group {my_resource_group} --template-file standard-agent.bicep
-        ```
-
-        - To customize additional parameters, including the OpenAI model deployment, hub name, etc, download and edit the `standard-agent.parameters.json` file, then run:
-
-        ```console
-        az deployment group create --resource-group {my_resource_group} --template-file standard-agent.bicep --parameters @standard-agent.parameters.json
-        ```
-
-         Resources for the hub, project, storage account, key vault, AI Services, and Azure AI Search will be created for you. The AI Services, AI Search, and Azure Blob Storage account will be connected to your project/hub and a gpt-4o-mini model will be deployed in the eastus region. 
-
-
-    </details>
-
-
-<br>
-</br>
 
 <details>
-    <summary><b>Option 3</b>: Follow steps 6-10 if you want specific control over the creation and configuration of these resources.</summary>
+    <summary><b>Option 2</b>: Use standard agent setup.</summary>
 
-6. Create an Azure OpenAI resource:
+1. To authenticate to your Azure subscription from the Azure CLI, use the following command:
 
    > [!NOTE]
-   > Azure AI Agent Service is currently available for all OpenAI models in available Azure Regions that are compatible with Azure Assistants (see the [models guide](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#assistants-preview)) and Llama 3.1-405B-instruct. We will be expanding to more models in the future.
+   > Be sure to run these commands with the subscription that has been allowlisted for the private preview.
 
    ```console
-    az cognitiveservices account create --name {MyOpenAIResource} --resource-group {my_resource_group} --location eastus --kind OpenAI --sku s0
+   az login
    ```
 
-   Alternatively, you can create an AI Services resource:
+2. Create a resource group:
 
    ```console
-   az cognitiveservices account create --name {my-multi-service-resource} --resource-group {my_resource_group} --kind AIServices --sku s0 --location eastus
+   az group create --name {my_resource_group} --location eastus
    ```
 
-   Save the id that gets output, you’ll need it later. It will look similar to: `https://eastus.api.cognitive.microsoft.com/ai_services_resource_id: /subscriptions/1234-5678-abcd-9fc6-62780b3d3e05/resourceGroups/my-resource-group/providers/Microsoft.CognitiveServices/accounts/multi-service-resource`
+   Make sure you have the role **Azure AI Developer** on the resource group you just created. 
+3. Download the `standard-agent.bicep` file, the `standard-agent.parameters.json` file, and the `modules-standard` folder to your project directory. Your directory should look like this
 
-1. Create an Azure AI Hub.
+    ```console
+    /my-project
+        - standard-agent.bicep
+        - standard-agent.parameters.json 
+        /modules-standard
+            - standard-ai-hub.bicep
+            - standard-ai-project.bicep
+            - standard-dependent-resources.bicep
+    ```
+4. Using the resource group you created in the previous step, run one of the following commands:
 
-   > [!NOTE] the following command auto creates a storage account, AML workspace and Key Vault.
+    - To use default resource names, run:
 
-   ```console
-   az ml workspace create --kind hub --resource-group {my_resource_group} --name {my_hub_name}
-   ```
+    ```console
+    az deployment group create --resource-group {my_resource_group} --template-file standard-agent.bicep
+    ```
 
-   OR
+    - To customize additional parameters, including the OpenAI model deployment, hub name, etc, download and edit the `standard-agent.parameters.json` file, then run:
 
-   Optional: If you want to connect an existing storage account and/or key vault you can specify them here:
+    ```console
+        az deployment group create --resource-group {my_resource_group} --template-file standard-agent.bicep --parameters @standard-agent.parameters.json
+    ```
 
-   ```console
-   az ml workspace create --kind hub --resource-group {my_resource_group} --name {my_hub_name} --location {hub-region} --storage-account {my_storage_account_id} --key-vault {my_key_vault_id}
-   ```
+    Resources for the hub, project, storage account, key vault, AI Services, and Azure AI Search will be created for you. The AI Services, AI Search, and Azure Blob Storage account will be connected to your project/hub and a gpt-4o-mini model will be deployed in the eastus region. To deploy a Llama model see [here](https://github.com/Azure/azure-ai-agents/blob/main/samples/llama-3.md).
 
-1. Connect your Hub to your Azure AI resource or Azure OpenAI resource. Replace the resource group and hub name with your resource and hub name.
 
-   - Save the following in a file named `connection.yml`.
+</details>
 
-   - If using an AI Services resource, use the following and replace ai_services_resource_id with the fully qualified ID from earlier.
-
-   ```yml
-   name: myazai_connection
-   type: azure_ai_services
-   endpoint: https://eastus.api.cognitive.microsoft.com/
-   ai_services_resource_id: /subscriptions/12345678-abcd-1234-9fc6-62780b3d3e05/resourceGroups/my-ai-resource-group/providers/Microsoft.CognitiveServices/accounts/multi-service-resource
-   ```
-
-   - If using an Azure OpenAI resource, create the following `connection.yml` file:
-
-   ```yml
-   name: { my_connection_name }
-   type: azure_open_ai
-   azure_endpoint: https://eastus.api.cognitive.microsoft.com/
-   ```
-
-1. Then run the following command:
-
-   ```console
-   az ml connection create --file connection.yml --resource-group {my_resource_group} --workspace-name {my_hub_name}
-   ```
-
-1. Create a Project.
-
-   - Run the following command to find your ARM ID:
-
-   ```console
-   az ml workspace show -n {my_hub_name} --resource-group {my_resource_group} --query id
-   ```
-
-   - Now run this command to create your project
-
-   ```console
-   az ml workspace create --kind project --hub-id {my_hub_ARM_ID} --resource-group {my_resource_group} --name {my_project_name}
-   ```
-
-   </details>
 
 ## Configure and run your first agent
 
@@ -249,14 +191,13 @@ Use the following code to create an agent and send a message to it. This agent w
 
 ### Setup
 
-1. Download the [Python .whl file](./packages/azure_ai_projects-1.0.0b1-py3-none-any.whl) to your project directory.
+1. Run the following commands to install the python packages. 
 
-2. Run the following commands to install the python packages.
+    ```console
+    pip install azure-ai-projects
+    pip install azure-identity
+    ```
 
-   ```console
-   pip install azure_ai_projects-1.0.0b1-py3-none-any.whl --user --force-reinstall
-   pip install azure-identity
-   ```
 
 ### Create an Agent
 
@@ -363,4 +304,108 @@ with project_client:
 
 ## C#
 
-C# support coming soon!
+```Cs
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+#nullable disable
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Azure.Core.TestFramework;
+using NUnit.Framework;
+
+namespace Azure.AI.Projects.Tests;
+
+public partial class Sample_Agent_Basics : SamplesBase<AIProjectsTestEnvironment>
+{
+    [Test]
+    public async Task BasicExample()
+    {
+        var connectionString = Environment.GetEnvironmentVariable("AZURE_AI_CONNECTION_STRING");
+
+        AgentsClient client = new AgentsClient(connectionString, new DefaultAzureCredential());
+        #endregion
+
+        // Step 1: Create an agent
+        #region Snippet:OverviewCreateAgent
+        Response<Agent> agentResponse = await client.CreateAgentAsync(
+            model: "gpt-4o",
+            name: "Math Tutor",
+            instructions: "You are a personal math tutor. Write and run code to answer math questions.",
+            tools: new List<ToolDefinition> { new CodeInterpreterToolDefinition() });
+        Agent agent = agentResponse.Value;
+        #endregion
+
+        // Intermission: agent should now be listed
+
+        Response<PageableList<Agent>> agentListResponse = await client.GetAgentsAsync();
+
+        //// Step 2: Create a thread
+        #region Snippet:OverviewCreateThread
+        Response<AgentThread> threadResponse = await client.CreateThreadAsync();
+        AgentThread thread = threadResponse.Value;
+        #endregion
+
+        // Step 3: Add a message to a thread
+        #region Snippet:OverviewCreateMessage
+        Response<ThreadMessage> messageResponse = await client.CreateMessageAsync(
+            thread.Id,
+            MessageRole.User,
+            "I need to solve the equation `3x + 11 = 14`. Can you help me?");
+        ThreadMessage message = messageResponse.Value;
+        #endregion
+
+        // Intermission: message is now correlated with thread
+        // Intermission: listing messages will retrieve the message just added
+
+        Response<PageableList<ThreadMessage>> messagesListResponse = await client.GetMessagesAsync(thread.Id);
+        Assert.That(messagesListResponse.Value.Data[0].Id == message.Id);
+
+        // Step 4: Run the agent
+        #region Snippet:OverviewCreateRun
+        Response<ThreadRun> runResponse = await client.CreateRunAsync(
+            thread.Id,
+            agent.Id,
+            additionalInstructions: "Please address the user as Jane Doe. The user has a premium account.");
+        ThreadRun run = runResponse.Value;
+        #endregion
+
+        #region Snippet:OverviewWaitForRun
+        do
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+            runResponse = await client.GetRunAsync(thread.Id, runResponse.Value.Id);
+        }
+        while (runResponse.Value.Status == RunStatus.Queued
+            || runResponse.Value.Status == RunStatus.InProgress);
+        #endregion
+
+        #region Snippet:OverviewListUpdatedMessages
+        Response<PageableList<ThreadMessage>> afterRunMessagesResponse
+            = await client.GetMessagesAsync(thread.Id);
+        IReadOnlyList<ThreadMessage> messages = afterRunMessagesResponse.Value.Data;
+
+        // Note: messages iterate from newest to oldest, with the messages[0] being the most recent
+        foreach (ThreadMessage threadMessage in messages)
+        {
+            Console.Write($"{threadMessage.CreatedAt:yyyy-MM-dd HH:mm:ss} - {threadMessage.Role,10}: ");
+            foreach (MessageContent contentItem in threadMessage.ContentItems)
+            {
+                if (contentItem is MessageTextContent textItem)
+                {
+                    Console.Write(textItem.Text);
+                }
+                else if (contentItem is MessageImageFileContent imageFileItem)
+                {
+                    Console.Write($"<image from ID: {imageFileItem.FileId}");
+                }
+                Console.WriteLine();
+            }
+        }
+        #endregion
+    }
+}
+
+```

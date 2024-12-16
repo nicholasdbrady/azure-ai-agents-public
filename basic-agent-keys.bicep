@@ -40,7 +40,7 @@ param modelVersion string = '2024-07-18'
 param modelSkuName string = 'GlobalStandard'
 
 @description('Model deployment capacity')
-param modelCapacity int = 100
+param modelCapacity int = 10
 
 @description('Model deployment location. If you want to deploy an Azure AI resource/model in different location than the rest of the resources created.')
 param modelLocation string = 'eastus'
@@ -62,7 +62,7 @@ param aiServicesName string = 'agent-ai-services'
 
 // Dependent resources for the Azure Machine Learning workspace
 module aiDependencies 'modules-basic/basic-dependent-resources.bicep' = {
-  name: 'dependencies-${name}-deployment'
+  name: 'dependencies-${name}-${uniqueSuffix}-deployment'
   params: {
     aiServicesName: aiServicesName
     storageName: storageName
@@ -80,7 +80,7 @@ module aiDependencies 'modules-basic/basic-dependent-resources.bicep' = {
 }
 
 module aiHub 'modules-basic/basic-ai-hub-keys.bicep' = {
-  name: 'ai-${name}-deployment'
+  name: 'ai-${name}-${uniqueSuffix}-deployment'
   params: {
     // workspace organization
     aiHubName: 'ai-${name}'
@@ -98,7 +98,7 @@ module aiHub 'modules-basic/basic-ai-hub-keys.bicep' = {
 }
 
 module aiProject 'modules-basic/basic-ai-project-keys.bicep' = {
-  name: 'ai-${projectName}-deployment'
+  name: 'ai-${projectName}-${uniqueSuffix}-deployment'
   params: {
     // workspace organization
     aiProjectName: 'ai-${projectName}'

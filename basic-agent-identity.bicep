@@ -40,10 +40,16 @@ param modelVersion string = '2024-07-18'
 param modelSkuName string = 'GlobalStandard'
 
 @description('Model deployment capacity')
-param modelCapacity int = 10
+param modelCapacity int = 50
 
 @description('Model deployment location. If you want to deploy an Azure AI resource/model in different location than the rest of the resources created.')
 param modelLocation string = 'eastus'
+
+@description('The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
+param aiServiceAccountResourceId string = ''
+
+@description('AI Service Account kind: either OpenAI or AIServices')
+param aiServiceKind string = 'AIServices'
 
 // Variables
 var name = toLower('${aiHubName}')
@@ -55,17 +61,23 @@ param storageName string = 'agent-storage'
 @description('Name of the Azure AI Services account')
 param aiServicesName string = 'agent-ai-services'
 
-
 // Create a short, unique suffix, that will be unique to each resource group
 // var uniqueSuffix = substring(uniqueString(resourceGroup().id), 0, 4)
 param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
 var uniqueSuffix = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
+
+var aiServiceExists = aiServiceAccountResourceId != ''
+
+var aiServiceParts = split(aiServiceAccountResourceId, '/')
+var aiServiceAccountSubscriptionId = aiServiceExists ? aiServiceParts[2] : subscription().subscriptionId 
+var aiServiceAccountResourceGroupName = aiServiceExists ? aiServiceParts[4] : resourceGroup().name
 
 // Dependent resources for the Azure Machine Learning workspace
 module aiDependencies 'modules-basic/basic-dependent-resources.bicep' = {
   name: 'dependencies-${name}-${uniqueSuffix}-deployment'
   params: {
     aiServicesName: '${aiServicesName}${uniqueSuffix}'
+    aiServiceAccountResourceId: aiServiceAccountResourceId
     storageName: '${storageName}${uniqueSuffix}'
     location: location
     tags: tags
@@ -91,7 +103,10 @@ module aiHub 'modules-basic/basic-ai-hub-identity.bicep' = {
     tags: tags
 
     // dependent resources
-    modelLocation: modelLocation
+    aiServicesName: aiDependencies.outputs.aiServicesName
+    aiServiceKind: aiServiceKind
+    aiServiceAccountResourceGroupName: aiDependencies.outputs.aiServiceAccountResourceGroupName
+    aiServiceAccountSubscriptionId: aiDependencies.outputs.aiServiceAccountSubscriptionId
     storageAccountId: aiDependencies.outputs.storageId
     aiServicesId: aiDependencies.outputs.aiservicesID
     aiServicesTarget: aiDependencies.outputs.aiservicesTarget
@@ -109,7 +124,18 @@ module aiProject 'modules-basic/basic-ai-project-identity.bicep' = {
     tags: tags
 
     // dependent resources
-    aiServicesName: '${aiServicesName}${uniqueSuffix}'
     aiHubId: aiHub.outputs.aiHubID
   }
 }
+
+module aiServiceRoleAssignments 'modules-standard/ai-service-role-assignments.bicep' = {
+  name: 'ai-service-role-assignments-${projectName}-${uniqueSuffix}-deployment'
+  scope: resourceGroup(aiServiceAccountSubscriptionId, aiServiceAccountResourceGroupName)
+  params: {
+    aiServicesName: aiDependencies.outputs.aiServicesName
+    aiProjectPrincipalId: aiProject.outputs.aiProjectPrincipalId
+    aiProjectId: aiProject.outputs.aiProjectResourceId
+  }
+}
+
+output PROJECT_CONNECTION_STRING string = aiProject.outputs.projectConnectionString

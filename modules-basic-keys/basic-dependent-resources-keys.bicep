@@ -25,19 +25,7 @@ param modelCapacity int
 @description('Model/AI Resource deployment location')
 param modelLocation string 
 
-@description('The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
-param aiServiceAccountResourceId string
-
-var aiServiceExists = aiServiceAccountResourceId != ''
-
-var aiServiceParts = split(aiServiceAccountResourceId, '/')
-
-resource existingAIServiceAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = if (aiServiceExists) {
-  name: aiServiceParts[8]
-  scope: resourceGroup(aiServiceParts[2], aiServiceParts[4])
-}
-
-resource aiServices 'Microsoft.CognitiveServices/accounts@2024-06-01-preview' = if(!aiServiceExists) {
+resource aiServices 'Microsoft.CognitiveServices/accounts@2024-06-01-preview' = {
   name: aiServicesName
   location: modelLocation
   sku: {
@@ -56,7 +44,7 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2024-06-01-preview' = 
   }
 }
 
-resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-06-01-preview'= if(!aiServiceExists) {
+resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-06-01-preview'= {
   parent: aiServices
   name: modelName
   sku : {
@@ -141,10 +129,6 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   }
 }
 
-output aiServicesName string =  aiServiceExists ? existingAIServiceAccount.name : aiServicesName
-output aiservicesID string = aiServiceExists ? existingAIServiceAccount.id : aiServices.id
-output aiservicesTarget string = aiServiceExists ? existingAIServiceAccount.properties.endpoint : aiServices.properties.endpoint
-output aiServiceAccountResourceGroupName string = aiServiceExists ? aiServiceParts[4] : resourceGroup().name
-output aiServiceAccountSubscriptionId string = aiServiceExists ? aiServiceParts[2] : subscription().subscriptionId 
-
+output aiservicesID string = aiServices.id
+output aiservicesTarget string = aiServices.properties.endpoint
 output storageId string = storage.id
