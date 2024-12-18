@@ -28,7 +28,6 @@ param acsConnectionName string
 param aoaiConnectionName string
 
 param uaiName string
-param subnetId string
 
 //for constructing endpoint
 var subscriptionId = subscription().subscriptionId
@@ -86,6 +85,5 @@ resource aiProject 'Microsoft.MachineLearningServices/workspaces@2023-08-01-prev
 
 output aiProjectName string = aiProject.name
 output aiProjectResourceId string = aiProject.id
-output aiProjectPrincipalId string = aiProject.identity.principalId
 output aiProjectWorkspaceId string = aiProject.properties.workspaceId
 output projectConnectionString string = aiProject.tags.ProjectConnectionString
