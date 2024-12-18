@@ -37,7 +37,7 @@ param capabilityHostName string = 'caphost1'
 param storageName string = 'agent-storage'
 
 @description('Name of the Azure AI Services account')
-param aiServicesName string = 'jekrame-agent-ai-service'
+param aiServicesName string = 'agent-ai-service'
 
 @description('Model name for deployment')
 param modelName string = 'gpt-4o-mini'
