@@ -51,16 +51,15 @@ param agentsSubnetName string = 'agents-subnet-${suffix}'
 param cxSubnetName string = 'hub-subnet-${suffix}'
 
 param userAssignedIdentityName string
+param searchLocation string = 'westus2'
 
 var cxSubnetRef = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, cxSubnetName)
 var agentSubnetRef = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, agentsSubnetName)
 
-
-resource uai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' existing = {
+resource uai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' = {
+  location: location
   name: userAssignedIdentityName
-  scope: resourceGroup()
 }
-
 
 // Step1: Create User Assigned Identity and configure role based access assignment
 // Tutorial: Create a user-assigned-identity & role-assignment
@@ -122,6 +121,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       }
     ]
   }
+  dependsOn: [
+    uai
+  ]
 }
 
 // Documentation: https://learn.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults?pivots=deployment-language-bicep
@@ -138,6 +140,13 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
     enableRbacAuthorization: true
     enablePurgeProtection: true
     publicNetworkAccess: 'Disabled'
+    accessPolicies: [
+      {
+        tenantId: subscription().tenantId
+        objectId: uai.properties.principalId
+        permissions: { secrets: [ 'set', 'get', 'list', 'delete', 'purge' ] }
+      }
+    ]
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: 'Deny'
@@ -211,7 +220,7 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
 // Documentation: https://learn.microsoft.com/en-us/azure/templates/microsoft.search/searchservices?pivots=deployment-language-bicep
 resource aiSearch 'Microsoft.Search/searchServices@2024-06-01-preview' = {
   name: aiSearchName
-  location: location
+  location: searchLocation
   tags: tags
   identity: {
     type: 'UserAssigned'
@@ -315,7 +324,9 @@ output storageAccountSubscriptionId string = subscription().subscriptionId
 
 output virtualNetworkName string = virtualNetwork.name
 output virtualNetworkId string = virtualNetwork.id
+output cxSubnetName string = cxSubnetName
+output agentSubnetName string = agentsSubnetName
 output cxSubnetId string = cxSubnetRef
 output agentSubnetId string = agentSubnetRef
-
+output storageNameCleaned string = storageNameCleaned
 output keyvaultId string = keyVault.id

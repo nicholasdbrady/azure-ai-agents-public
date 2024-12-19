@@ -57,7 +57,6 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing =
   name: aiServicesName
   scope: resourceGroup(aiServiceAccountSubscriptionId, aiServiceAccountResourceGroupName)
 }
-
 resource searchService 'Microsoft.Search/searchServices@2023-11-01' existing = {
   name: aiSearchName
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
@@ -125,6 +124,11 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview'
       capabilityHostKind: 'Agents'
     }
   }
+  dependsOn: [
+    userAssignedIdentity
+    aiServices
+    searchService
+  ]
 }
 
 output aiHubID string = aiHub.id

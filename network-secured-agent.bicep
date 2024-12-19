@@ -40,22 +40,22 @@ param storageName string = 'agent-storage'
 param aiServicesName string = 'agent-ai-service'
 
 @description('Model name for deployment')
-param modelName string = 'gpt-4o-mini'
+param modelName string = 'o1-preview'
 
 @description('Model format for deployment')
 param modelFormat string = 'OpenAI'
 
 @description('Model version for deployment')
-param modelVersion string = '2024-07-18'
+param modelVersion string = '2024-09-12'
 
 @description('Model deployment SKU name')
 param modelSkuName string = 'GlobalStandard'
 
 @description('Model deployment capacity')
-param modelCapacity int = 30
+param modelCapacity int = 1
 
 @description('Model deployment location. If you want to deploy an Azure AI resource/model in different location than the rest of the resources created.')
-param modelLocation string = 'eastus'
+param modelLocation string = 'westus2'
 
 @description('The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiServiceAccountResourceId string = ''
@@ -68,7 +68,6 @@ var name = toLower('${aiHubName}')
 var projectName = toLower('${aiProjectName}')
 
 // Create a short, unique suffix, that will be unique to each resource group
-// var uniqueSuffix = substring(uniqueString(resourceGroup().id), 0, 4)
 param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
 param uniqueSuffix string = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
 
@@ -98,13 +97,13 @@ module identity 'modules-network-secured/network-secured-identity.bicep' = {
 module aiDependencies 'modules-network-secured/network-secured-dependent-resources.bicep' = {
   name: 'dependencies-${name}-${uniqueSuffix}-deployment'
   params: {
-    location: location
     suffix: uniqueSuffix
     storageName: '${storageName}${uniqueSuffix}'
     keyvaultName: 'kv-${name}-${uniqueSuffix}'
     aiServicesName: '${aiServicesName}${uniqueSuffix}'
     aiSearchName: '${aiSearchName}-${uniqueSuffix}'
     tags: tags
+    location: location
 
      // Model deployment parameters
      modelName: modelName
@@ -149,6 +148,31 @@ module aiHub 'modules-network-secured/network-secured-ai-hub.bicep' = {
 }
 
 
+resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
+  name: aiServicesName
+  scope: resourceGroup(aiServiceAccountSubscriptionId, aiServiceAccountResourceGroupName)
+}
+
+resource aiSearch 'Microsoft.Search/searchServices@2023-11-01' existing = {
+  name: aiSearchName
+  scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
+}
+
+module privateEndpointAndDNS 'modules-network-secured/private-endpoint-and-dns.bicep' = {
+  name: 'dependencies-${uniqueSuffix}-private-endpoint'
+  params: {
+    aiServicesName: aiServicesName
+    aiSearchName: aiSearchName
+    storageName: aiDependencies.outputs.storageNameCleaned
+    vnetName: aiDependencies.outputs.virtualNetworkName
+    cxSubnetName: aiDependencies.outputs.cxSubnetName
+  }
+  dependsOn: [
+    aiServices
+    aiSearch
+  ]
+}
+
 module aiProject 'modules-network-secured/network-secured-ai-project.bicep' = {
   name: '${projectName}-${uniqueSuffix}-deployment'
   params: {
@@ -165,7 +189,6 @@ module aiProject 'modules-network-secured/network-secured-ai-project.bicep' = {
     aiHubId: aiHub.outputs.aiHubID
     acsConnectionName: aiHub.outputs.acsConnectionName
     aoaiConnectionName: aiHub.outputs.aoaiConnectionName
-    subnetId: aiDependencies.outputs.agentSubnetId
     uaiName: userAssignedIdentityName
   }
 }
@@ -190,4 +213,4 @@ module aiSearchRoleAssignments 'modules-standard/ai-search-role-assignments.bice
   }
 }
 
-output PROJECT_CONNECTION_STRING string = aiProject.outputs.projectConnectionString
+//output PROJECT_CONNECTION_STRING string = aiProject.outputs.projectConnectionString
