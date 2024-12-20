@@ -45,6 +45,8 @@ param uaiName string
 
 param subnetId string
 
+param aiHubExists bool = false
+
 var acsConnectionName = '${aiHubName}-connection-AISearch'
 
 var aoaiConnection  = '${aiHubName}-connection-AIServices_aoai'
@@ -62,8 +64,9 @@ resource searchService 'Microsoft.Search/searchServices@2023-11-01' existing = {
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
 }
 
+
 // Documentation: https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?tabs=bicep
-resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview' = {
+resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview' = if(!aiHubExists) {
   name: aiHubName
   location: location
   kind: 'hub'
@@ -118,7 +121,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview'
   // Resource definition for the capability host
   // Documentation: https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces/capabilityhosts?tabs=bicep
   resource capabilityHost 'capabilityHosts@2024-10-01-preview' = {
-    name: '${aiHubName}-${capabilityHostName}'
+    name: capabilityHostName
     properties: {
       customerSubnet: subnetId
       capabilityHostKind: 'Agents'
@@ -127,7 +130,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01-preview'
   dependsOn: [
     userAssignedIdentity
     aiServices
-    searchService
+    //searchService
   ]
 }
 
