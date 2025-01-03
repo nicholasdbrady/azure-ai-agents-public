@@ -3,6 +3,7 @@ param aiSearchName string
 param storageName string
 param vnetName string
 param cxSubnetName string
+param suffix string
 
 resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: aiServicesName
@@ -97,13 +98,48 @@ resource aiServicesPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01'
   location: 'global'
 }
 
+resource aiServicesLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
+  parent: aiServicesPrivateDnsZone
+  location: resourceGroup().location
+  name: 'aiServices-${suffix}-link'
+  properties: {
+    resolutionPolicy: 'string'
+    virtualNetwork: {
+      id: vnet.id
+    }
+  }
+}
 
 resource aiSearchPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   name: 'privatelink.search.windows.net'
   location: 'global'
 }
 
+resource aiSearchLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
+  parent: aiSearchPrivateDnsZone
+  location: resourceGroup().location
+  name: 'aiSearch-${suffix}-link'
+  properties: {
+    resolutionPolicy: 'string'
+    virtualNetwork: {
+      id: vnet.id
+    }
+  }
+}
+
 resource storagePrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   name: 'privatelink.blob.core.windows.net'
   location: 'global'
+}
+
+resource storageLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
+  parent: storagePrivateDnsZone
+  location: resourceGroup().location
+  name: 'storage-${suffix}-link'
+  properties: {
+    resolutionPolicy: 'string'
+    virtualNetwork: {
+      id: vnet.id
+    }
+  }
 }

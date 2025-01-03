@@ -1,9 +1,9 @@
 // Existing Resource Overrides
-var storageOverride = 'agentstoragersxr'
+var storageOverride = ''
 var keyVaultOverride = ''
-var aiServicesOverride = 'agent-ai-servicey4as'
-var aiSearchOverride = 'agent-ai-search-efsl'
-var userAssignedIdentityOverride = 'secured-agents-identity-rsxr'
+var aiServicesOverride = ''
+var aiSearchOverride = ''
+var userAssignedIdentityOverride = ''
 
 
 /* ---------------------------------- Deployment Identifiers ---------------------------------- */
@@ -200,6 +200,7 @@ module privateEndpointAndDNS 'modules-network-secured/private-endpoint-and-dns.b
     storageName: aiDependencies.outputs.storageAccountName
     vnetName: aiDependencies.outputs.virtualNetworkName
     cxSubnetName: aiDependencies.outputs.cxSubnetName
+    suffix: uniqueSuffix
   }
   dependsOn: [
     aiServices
