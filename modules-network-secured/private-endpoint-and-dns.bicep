@@ -1,9 +1,10 @@
-param aiServicesName string
-param aiSearchName string
+param aiServicesName string 
+param aiSearchName string 
 param storageName string
 param vnetName string
 param cxSubnetName string
 param suffix string
+param aiStorageId string
 
 resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: aiServicesName
@@ -23,11 +24,6 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' existing = {
 resource cxSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' existing = {
   parent: vnet
   name: cxSubnetName
-}
-
-resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' existing = {
-  name: storageName
-  scope: resourceGroup()
 }
 
 resource aiServicesPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = {
@@ -83,7 +79,7 @@ resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' 
       {
         name: '${storageName}-private-link-service-connection'
         properties: {
-          privateLinkServiceId: storage.id
+          privateLinkServiceId: aiStorageId
           groupIds: [
             'blob'
           ]
@@ -100,13 +96,13 @@ resource aiServicesPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01'
 
 resource aiServicesLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: aiServicesPrivateDnsZone
-  location: resourceGroup().location
+  location: 'global'
   name: 'aiServices-${suffix}-link'
   properties: {
-    resolutionPolicy: 'string'
     virtualNetwork: {
       id: vnet.id
     }
+    registrationEnabled: false
   }
 }
 
@@ -117,13 +113,13 @@ resource aiSearchPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' =
 
 resource aiSearchLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: aiSearchPrivateDnsZone
-  location: resourceGroup().location
+  location: 'global'
   name: 'aiSearch-${suffix}-link'
   properties: {
-    resolutionPolicy: 'string'
     virtualNetwork: {
       id: vnet.id
     }
+    registrationEnabled: false
   }
 }
 
@@ -134,12 +130,12 @@ resource storagePrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = 
 
 resource storageLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: storagePrivateDnsZone
-  location: resourceGroup().location
+  location: 'global'
   name: 'storage-${suffix}-link'
   properties: {
-    resolutionPolicy: 'string'
     virtualNetwork: {
       id: vnet.id
     }
+    registrationEnabled: false
   }
 }

@@ -11,7 +11,7 @@ resource searchService 'Microsoft.Search/searchServices@2024-06-01-preview' exis
 
 // search roles
 resource searchIndexDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: '9ebe5a00-799e-43f5-93ac-243d3dce84a7'
+  name: '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
   scope: resourceGroup()
 }
 
@@ -26,7 +26,7 @@ resource searchIndexDataContributorAssignment 'Microsoft.Authorization/roleAssig
 }
 
 resource searchServiceContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: '8ca78c08-252a-4471-8644-bb5ff32d4ba0'
+  name: '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
   scope: resourceGroup()
 }
 

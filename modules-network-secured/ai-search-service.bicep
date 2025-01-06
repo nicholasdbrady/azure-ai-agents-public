@@ -1,7 +1,7 @@
-param userAssignedIdentityName string = 'secured-agents-identity-ksmc'
+param userAssignedIdentityName string
 @description('The name of the AI Search resource')
-param aiSearchName string = 'agent-ai-search-ksmc'
-param searchLocation string = 'westus2'
+param aiSearchName string
+param searchLocation string
 @description('Tags to add to the resources')
 param tags object = {}
 

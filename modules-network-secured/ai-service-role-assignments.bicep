@@ -1,7 +1,5 @@
 // Assigns the necessary roles to the AI project
 
-param subscriptionId string
-param resourceGroupName string
 param aiServicesName string
 param aiProjectPrincipalId string
 param aiProjectId string

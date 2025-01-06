@@ -49,10 +49,10 @@ param defaultAiSearchName string = 'agent-ai-search'
 param defaultCapabilityHostName string = 'caphost1'
 
 @description('Name of the storage account')
-param defaultStorageName string = 'agent-storage'
+param defaultStorageName string = 'agentstorage'
 
 @description('Name of the Azure AI Services account')
-param defaultAiServicesName string = 'agent-ai-servicey4as'
+param defaultAiServicesName string = 'agent-ai-service'
 
 @description('Model name for deployment')
 param modelName string = 'o1-preview'
@@ -118,12 +118,14 @@ resource existingAiSearch 'Microsoft.Search/searchServices@2024-06-01-preview' e
   name: aiSearchName
   scope: resourceGroup()
 }
+
+var storageNameClean = '${defaultStorageName}${uniqueSuffix}'
 // Dependent resources for the Azure Machine Learning workspace
 module aiDependencies 'modules-network-secured/network-secured-dependent-resources.bicep' = {
   name: '${deploymentName}-${uniqueSuffix}--dependencies'
   params: {
     suffix: uniqueSuffix
-    storageName: '${defaultStorageName}${uniqueSuffix}'
+    storageName: storageNameClean
     keyvaultName: 'kv-${defaultAiHubName}-${uniqueSuffix}'
     aiServicesName: aiServiceName
     aiSearchName: aiSearchName
@@ -197,7 +199,8 @@ module privateEndpointAndDNS 'modules-network-secured/private-endpoint-and-dns.b
   params: {
     aiServicesName: aiDependencies.outputs.aiServicesName
     aiSearchName: aiDependencies.outputs.aiSearchName
-    storageName: aiDependencies.outputs.storageAccountName
+    aiStorageId: aiDependencies.outputs.storageId
+    storageName: storageNameClean
     vnetName: aiDependencies.outputs.virtualNetworkName
     cxSubnetName: aiDependencies.outputs.cxSubnetName
     suffix: uniqueSuffix
@@ -213,14 +216,14 @@ module aiProject 'modules-network-secured/network-secured-ai-project.bicep' = {
   name: '${deploymentName}-${uniqueSuffix}--project'
   params: {
     // workspace organization
-    aiProjectName: defaultAiProjectName
+    aiProjectName: '${defaultAiProjectName}-${uniqueSuffix}'
     aiProjectFriendlyName: defaultAiProjectFriendlyName
     aiProjectDescription: defaultAiProjectDescription
     location: location
     tags: tags
     
     // dependent resources
-    capabilityHostName: '${defaultAiProjectName}-${uniqueSuffix}-${defaultCapabilityHostName}'
+    capabilityHostName: defaultCapabilityHostName
 
     aiHubId: aiHub.outputs.aiHubID
     acsConnectionName: aiHub.outputs.acsConnectionName
@@ -229,7 +232,7 @@ module aiProject 'modules-network-secured/network-secured-ai-project.bicep' = {
   }
 }
 
-module aiServiceRoleAssignments 'modules-standard/ai-service-role-assignments.bicep' = {
+module aiServiceRoleAssignments 'modules-network-secured/ai-service-role-assignments.bicep' = {
   name: '${deploymentName}-${uniqueSuffix}--AiServices-RA'
   scope: resourceGroup()
   params: {
@@ -239,7 +242,7 @@ module aiServiceRoleAssignments 'modules-standard/ai-service-role-assignments.bi
   }
 }
 
-module aiSearchRoleAssignments 'modules-standard/ai-search-role-assignments.bicep' = {
+module aiSearchRoleAssignments 'modules-network-secured/ai-search-role-assignments.bicep' = {
   name: '${deploymentName}-${uniqueSuffix}--AiSearch-RA'
   scope: resourceGroup()
   params: {

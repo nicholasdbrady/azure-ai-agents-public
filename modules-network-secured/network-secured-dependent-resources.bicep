@@ -54,7 +54,6 @@ param agentsSubnetName string = 'agents-subnet-${suffix}'
 param cxSubnetName string = 'hub-subnet-${suffix}'
 
 param userAssignedIdentityName string
-param searchLocation string = 'westus2'
 
 var cxSubnetRef = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, cxSubnetName)
 var agentSubnetRef = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, agentsSubnetName)
@@ -232,7 +231,7 @@ resource defaultModelDeployment 'Microsoft.CognitiveServices/accounts/deployment
 // Documentation: https://learn.microsoft.com/en-us/azure/templates/microsoft.search/searchservices?pivots=deployment-language-bicep
 resource defaultAiSearch 'Microsoft.Search/searchServices@2024-06-01-preview' = if(!aiSearchExists) {
   name: aiSearchName
-  location: searchLocation
+  location: location
   tags: tags
   identity: {
     type: 'UserAssigned'

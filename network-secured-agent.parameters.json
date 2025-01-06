@@ -30,7 +30,7 @@
         "value": "caphost1"
       },
       "storageName": {
-        "value": "agent-storage"
+        "value": "agentstorage"
       },
       "aiServicesName": {
         "value": "agent-ai-services"
@@ -51,7 +51,7 @@
         "value": 50
       },
       "modelLocation": {
-        "value": "eastus"
+        "value": "westus2"
       },
       "aiServiceAccountResourceId": {
         "value": ""
