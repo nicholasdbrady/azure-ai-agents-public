@@ -41,6 +41,7 @@ The following Azure regions are currently supported for private virtual networks
 - East US
 - West Central US
 - West US
+- West US 3
 - Japan East
 - UK South
 - France Central
