@@ -4,6 +4,9 @@
 
 Build fast, secure enterprise AI Agents to automate any business workflow
 
+> [!IMPORTANT]
+> This feature is currently in private preview. Only select customers have been approved to participate in this preview.
+
 ## ❓What is the Azure AI Agent Service?
 
 Azure AI Agent Service is a fully-managed service designed to empower developers to securely build, deploy, and scale high-quality, and extensible AI agents. Leveraging an extensive ecosystem of models, tools and capabilities from OpenAI, Microsoft, and third-party providers, Azure AI Agent Service enables building agents for a wide range of generative AI use cases.
