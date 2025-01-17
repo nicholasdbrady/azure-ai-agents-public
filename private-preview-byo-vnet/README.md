@@ -1,6 +1,6 @@
 # 🤖 Azure AI Agent Service – Private Virtual Network Setup Guide 🤖
 
- | [**Get started**](./quickstart-python.md) | 
+ | [**Get started**](./quickstart-python.md) |
 
 Build fast, secure enterprise AI Agents to automate any business workflow
 
@@ -41,8 +41,6 @@ The following Azure regions are currently supported for private virtual networks
 - East US
 - West Central US
 - West US
-- West US 2
-- West US 3
 - Japan East
 - UK South
 - France Central
