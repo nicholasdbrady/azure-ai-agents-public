@@ -1,4 +1,4 @@
-# QuickStart: Create a new agent with BYO Vnet
+# QuickStart: Create a new network-secured agent with user-managed identity
 
 ## Prerequisites
 
@@ -92,6 +92,11 @@
 | Message   | A message created by an agent or a user. Messages can include text, images, and other files. Messages are stored as a list on the Thread.                                                                                                 |
 | Run       | Activation of an agent to begin running based on the contents of Thread. The agent uses its configuration and Thread’s Messages to perform tasks by calling models and tools. As part of a Run, the agent appends Messages to the Thread. |
 | Run Step  | A detailed list of steps the agent took as part of a Run. An agent can call tools or create Messages during its run. Examining Run Steps allows you to understand how the agent is getting to its results.                                |
+
+**The following code shows how to create and run an agent using Python (Azure SDK):**
+
+* C#: See the [C# quickstart](https://learn.microsoft.com/azure/ai-services/agents/quickstart?pivots=programming-language-csharp)
+* Python OpenAI SDK: See the [Python OpenAI SDK quickstart](https://learn.microsoft.com/azure/ai-services/agents/quickstart?pivots=programming-language-python-openai)
 
 Run the following commands to install the python packages.
 

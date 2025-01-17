@@ -1,6 +1,6 @@
 # 🤖 Azure AI Agent Service – Private Virtual Network Setup Guide 🤖
 
- | [**Get started**](./quickstart-python.md) | [**Samples**](./samples/) |
+ | [**Get started**](./quickstart-python.md) | 
 
 Build fast, secure enterprise AI Agents to automate any business workflow
 
