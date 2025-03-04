@@ -40,7 +40,7 @@ param modelVersion string = '2024-07-18'
 param modelSkuName string = 'GlobalStandard'
 
 @description('Model deployment capacity')
-param modelCapacity int = 50
+param modelCapacity int = 10
 
 @description('Model deployment location. If you want to deploy an Azure AI resource/model in different location than the rest of the resources created.')
 param modelLocation string = 'eastus'
@@ -50,22 +50,22 @@ var name = toLower('${aiHubName}')
 var projectName = toLower('${aiProjectName}')
 
 @description('Name of the storage account')
-param storageName string = 'agent-storage'
+param storageName string = 'agent-ai-storage'
 
 @description('Name of the Azure AI Services account')
 param aiServicesName string = 'agent-ai-services'
 
 // Create a short, unique suffix, that will be unique to each resource group
 // var uniqueSuffix = substring(uniqueString(resourceGroup().id), 0, 4)
-param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
-var uniqueSuffix = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
+// param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
+// var uniqueSuffix = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
 
 // Dependent resources for the Azure Machine Learning workspace
-module aiDependencies 'modules-basic-keys/basic-dependent-resources-keys.bicep' = {
+module aiDependencies 'modules-basic/basic-dependent-resources.bicep' = {
   name: 'dependencies-${name}-${uniqueSuffix}-deployment'
   params: {
-    aiServicesName: '${aiServicesName}${uniqueSuffix}'
-    storageName: '${storageName}${uniqueSuffix}'
+    aiServicesName: aiServicesName
+    storageName: storageName
     location: location
     tags: tags
 
@@ -79,11 +79,11 @@ module aiDependencies 'modules-basic-keys/basic-dependent-resources-keys.bicep' 
   }
 }
 
-module aiHub 'modules-basic-keys/basic-ai-hub-keys.bicep' = {
+module aiHub 'modules-basic/basic-ai-hub-keys.bicep' = {
   name: 'ai-${name}-${uniqueSuffix}-deployment'
   params: {
     // workspace organization
-    aiHubName: 'ai-${name}-${uniqueSuffix}'
+    aiHubName: 'ai-${name}'
     aiHubFriendlyName: aiHubFriendlyName
     aiHubDescription: aiHubDescription
     location: location
@@ -97,11 +97,11 @@ module aiHub 'modules-basic-keys/basic-ai-hub-keys.bicep' = {
   }
 }
 
-module aiProject 'modules-basic-keys/basic-ai-project-keys.bicep' = {
+module aiProject 'modules-basic/basic-ai-project-keys.bicep' = {
   name: 'ai-${projectName}-${uniqueSuffix}-deployment'
   params: {
     // workspace organization
-    aiProjectName: 'ai-${projectName}-${uniqueSuffix}'
+    aiProjectName: 'ai-${projectName}'
     aiProjectFriendlyName: aiProjectFriendlyName
     aiProjectDescription: aiProjectDescription
     location: location
